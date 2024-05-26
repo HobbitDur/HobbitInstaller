@@ -1,0 +1,5 @@
+Here the main developers oof the mods:
+FFNX: TrueOdin, myst6re, Cosmos, vertex2995
+HobbitGameplayMod: HobbitDur
+FFNxFF8Music: myst6re
+This installer: HobbitDur
