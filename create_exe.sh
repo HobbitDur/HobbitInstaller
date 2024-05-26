@@ -1,0 +1,1 @@
+pyinstaller -F --specpath release --distpath release --workpath release/build main.py
