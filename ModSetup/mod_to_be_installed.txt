@@ -1,4 +1,7 @@
 FFNx
 FFNxFF8Music
 FF78Launcher
+FFNxBattlefields
+FFNxLunarCry
+FFNxTripod
 HobbitGameplayMod
