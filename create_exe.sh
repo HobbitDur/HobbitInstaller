@@ -1,1 +1,11 @@
-.venv/Scripts/pyinstaller.exe -n HobbitInstaller -F --specpath release/build --distpath release --workpath release/build --paths .venv/Lib/site-packages --hidden-import patool main.py
+.venv/Scripts/pyinstaller.exe -n HobbitInstaller -F --specpath release/build --distpath release --workpath release/build --paths .venv/Lib/site-packages --hidden-import patool main.py;
+mkdir -p release/HobbitInstaller-0.x.x;
+cp -R Resources release/HobbitInstaller-0.x.x/;
+cp -R ModSetup release/HobbitInstaller-0.x.x/;
+cp release/*.exe release/HobbitInstaller-0.x.x/;
+cd release/HobbitInstaller-0.x.x;
+"../../Resources/7z.exe" a -tzip ../HobbitInstaller-0.x.x.zip .;
+cd ..;
+rm -r HobbitInstaller-0.x.x;
+rm -r build;
+rm *.exe;

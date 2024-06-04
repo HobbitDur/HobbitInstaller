@@ -1,19 +1,11 @@
 import argparse
 import os
-import re
 import shutil
 import sys
-from zipfile import ZipFile
-
 from PyQt5.QtWidgets import QApplication
 
 from hobbitgui import WindowInstaller
 from modmanager import ModManager
-import patoolib
-import requests
-
-import hobbitgui
-
 
 
 

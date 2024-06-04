@@ -122,6 +122,9 @@ class ModManager():
                 direct_file = self.mod_dict[mod_name]['link']
                 if mod_name == "HobbitGameplayMod":  # Special because the link as a content-type of html instead of octetstream
                     dd_file_name = "HobbitGameplayMod.zip"
+                elif mod_name == "FFNx-RoseAndWine":
+                    dd_file_name = "FFNx-RoseAndWine.rar"
+                    self.ffnx_manager.change_rosewine_music_option()
                 elif mod_name == "FFNxBattlefield":
                     dd_file_name = "FFNxBattlefields.rar"
                 elif mod_name == "FFNxLunarCry":
@@ -132,7 +135,7 @@ class ModManager():
                     dd_file_name = "FFNxTripod.rar"
                 elif mod_name == "FFNxFF8Music":  # need remove " around
                     dd_file_name = direct_file.split('/')[-1]
-                    self.ffnx_manager.change_music_option()
+                    self.ffnx_manager.change_ffnx_music_option()
                 else:
                     dd_file_name = None
                 dd_file_name = self.download_file(direct_file, write_file=True, file_name=dd_file_name)[1]
@@ -156,9 +159,9 @@ class ModManager():
                         local_path = ''
                     else:
                         local_path = dir_path.replace(archive + os.path.sep, '')
-                        if local_path in ['FFNxBattlefields', 'FFNxLunarCry', 'FFNxSeedReborn', 'FFNxTripod']:
+                        if local_path in ['FFNxBattlefields', 'FFNxLunarCry', 'FFNxSeedReborn', 'FFNxTripod', "FFNx-RoseAndWine.rar"]:
                             local_path = local_path.replace(mod_name, '')
-                    if mod_name in ['FFNxBattlefields', 'FFNxLunarCry', 'FFNxSeedReborn', 'FFNxTripod']:
+                    if mod_name in ['FFNxBattlefields', 'FFNxLunarCry', 'FFNxSeedReborn', 'FFNxTripod', "FFNx-RoseAndWine.rar"]:
                         local_path = local_path.replace(mod_name + os.path.sep, '')
                     dest_folder = os.path.join(self.ff8_path, local_path)
                     dest_file = os.path.join(dest_folder, file_name)
@@ -171,7 +174,7 @@ class ModManager():
                 shutil.rmtree(archive)
 
             if mod_name == "FFNx":
-                ffnx_setup = self.ffnx_manager.read_ffnx_setup_file(ff8_path=self.ff8_path)
+                self.ffnx_manager.read_ffnx_setup_file(ff8_path=self.ff8_path)
 
         # remove_test_file()
         if not keep_download_mod:

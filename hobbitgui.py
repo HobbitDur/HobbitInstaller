@@ -7,6 +7,7 @@ class WindowInstaller(QWidget):
     def __init__(self, mod_manager, keep_downloaded_mod=False):
         QWidget.__init__(self)
         self.setWindowTitle("HobbitInstaller")
+        self.setMinimumSize(300, 400)
         # Button
         self.install_button = QPushButton("Install")
         self.install_button.clicked.connect(self.install_click)
@@ -42,7 +43,6 @@ class WindowInstaller(QWidget):
     def install_click(self):
         mod_to_be_installed = []
         for mod_name in self.mod_manager.mod_file_list:
-            print(mod_name)
             if self.mod_checkbox[mod_name].checkState() == Qt.Checked:
                 mod_to_be_installed.append(mod_name)
         self.mod_manager.install_mods(mod_to_be_installed,self.keep_downloaded_mod)
