@@ -8,6 +8,7 @@ FF78Launcher
 FFNxBattlefields
 FFNxLunarCry
 FFNxTripod
+Ragnarok-EN-ONLY
 HobbitGameplayMod-ALPHA-FR-ONLY
 FF8Curiosite-FR-ONLY
 FFVIII-Reloaded-FR-ONLY
