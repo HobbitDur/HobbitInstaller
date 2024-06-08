@@ -9,7 +9,6 @@ import requests
 
 
 class ModManager():
-
     GIT_MOD_FILE = os.path.join("ModSetup", "git_mod_list.txt")
     GIT_TAG_FILE = os.path.join("ModSetup", "git_tag.txt")
     DIRECT_LINK_FILE = os.path.join("ModSetup", "direct_link.txt")
@@ -22,6 +21,7 @@ class ModManager():
     MOD_AVAILABLE_FILE = 'mod_available.txt'
     MOD_FILE_NAME = 'mod_file_name.txt'
     LIST_MOD_TO_BE_SETUP = ['FFNxFF8Music', 'FFNx-RoseAndWine']
+
     def __init__(self, ff8_path='.'):
         self.buffer_git_list_mod = []
         self.buffer_tag_mod = []
@@ -40,8 +40,6 @@ class ModManager():
         self.__load_direct_link_info()
         self.__load_mod_file_name()
 
-
-
     def __read_setup_files(self):
         with (open(self.GIT_MOD_FILE, "r") as f):
             self.buffer_git_list_mod = f.read().split('\n')
@@ -50,13 +48,16 @@ class ModManager():
         with (open(self.DIRECT_LINK_FILE, "r") as f):
             self.buffer_direct_link_mod = f.read().split('\n')
         if len(self.buffer_git_list_mod) != len(self.buffer_tag_mod):
-            raise ValueError("The file {} and file {} doesn't have the same number of line !".format(GIT_MOD_FILE, GIT_TAG_FILE))
+            raise ValueError("The file {} and file {} doesn't have the same number of line !".format(self.GIT_MOD_FILE, self.GIT_TAG_FILE))
+
     def __load_mod_file_name(self):
         with open(os.path.join(self.FOLDER_SETUP, self.MOD_FILE_NAME), "r") as file:
             self.mod_list_file_name.extend(file.read().split('\n'))
+
     def __load_mod_list(self):
         with open(os.path.join(self.FOLDER_SETUP, self.MOD_AVAILABLE_FILE), "r") as file:
             self.mod_file_list.extend(file.read().split('\n'))
+
     def __load_github_info(self):
         # Loading github info for all github mod
         self.github_mod_list = []
@@ -96,8 +97,9 @@ class ModManager():
         return request_return, file_name
 
     def save_local_file(self, lang="en"):
-        path_to_files = os.path.join(self.ff8_path, 'Data', 'lang-'+lang)
-    def install_mod(self,mod_name:str, keep_download_mod=False, special_status={}, download=True):
+        path_to_files = os.path.join(self.ff8_path, 'Data', 'lang-' + lang)
+
+    def install_mod(self, mod_name: str, keep_download_mod=False, special_status={}, download=True):
         os.makedirs(self.FOLDER_DOWNLOAD, exist_ok=True)
         if mod_name in self.github_mod_list:
             if download:
@@ -130,19 +132,7 @@ class ModManager():
 
         elif mod_name in self.direct_link_mod_list:
             direct_file = self.mod_dict[mod_name]['link']
-            if mod_name == "HobbitGameplayMod-BETA":  # Special because the link as a content-type of html instead of octetstream
-                dd_file_name = "HobbitGameplayMod.zip"
-            elif mod_name == "FFNx-RoseAndWine":
-                dd_file_name = "FFNx-RoseAndWine.rar"
-            elif mod_name == "FFNxBattlefield":
-                dd_file_name = "FFNxBattlefields.rar"
-            elif mod_name == "FFNxLunarCry":
-                dd_file_name = "FFNxLunarCry.rar"
-            elif mod_name == "FFNxSeedReborn":
-                dd_file_name = "FFNxSeedReborn.rar"
-            elif mod_name == "FFNxTripod":
-                dd_file_name = "FFNxTripod.rar"
-            elif mod_name == "FFNxFF8Music":  # need remove " around
+            if mod_name == "FFNxFF8Music":  # need remove " around
                 dd_file_name = direct_file.split('/')[-1]
             else:
                 dd_file_name = None
@@ -155,21 +145,20 @@ class ModManager():
         archive = ""
         if '.rar' in dd_file_name or '.7z' in dd_file_name:
             archive = "temparchive"
-            patoolib.extract_archive(os.path.join(self.FOLDER_DOWNLOAD, dd_file_name), verbosity=-1, outdir=archive, program='Resources/7z.exe')
+            patoolib.extract_archive(os.path.join(self.FOLDER_DOWNLOAD, dd_file_name), verbosity=-1, outdir=archive, program=os.path.join('Resources', '7z.exe'))
         # Unzip locally then copy all files, so we don't have problem erasing files while unziping
         elif '.zip' in dd_file_name:
             archive = "tempzip"
             os.makedirs(archive, exist_ok=True)
             with ZipFile(os.path.join(self.FOLDER_DOWNLOAD, dd_file_name), 'r') as zip_ref:
                 zip_ref.extractall(archive)
-
         list_dir = os.listdir(archive)
         try:
             index_folder = os.listdir(archive).index(dd_file_name.split('.')[0])
+
         except ValueError:
             index_folder = -1
-
-        if mod_name == "FFVIII-Reloaded-FR-ONLY":# Special handle
+        if mod_name == "FFVIII-Reloaded-FR-ONLY":  # Special handle
             if special_status[mod_name] == "FF8 Reloaded Classic":
                 archive_to_copy = os.path.join(archive, "FFVIII Reloaded classic")
             elif special_status[mod_name] == "FF8 Reloaded Level 1":
@@ -177,7 +166,7 @@ class ModManager():
             elif special_status[mod_name] == "FF8 Reloaded Level 100":
                 archive_to_copy = os.path.join(archive, "FFVIII Reloaded level 100")
             else:
-                archive_to_copy = archive #Shouldn't happen
+                archive_to_copy = archive  # Shouldn't happen
             futur_path = os.path.join(self.ff8_path, 'Data', 'lang-fr')
         elif mod_name == "FF8Curiosite-FR-ONLY":
             archive_to_copy = archive  # Shouldn't happen
@@ -188,17 +177,15 @@ class ModManager():
         elif 'DefaultFiles' in mod_name:
             futur_path = os.path.join(self.ff8_path, 'Data', 'lang-{}'.format(mod_name[-2:].lower()))
             archive_to_copy = os.path.join(archive, list_dir[index_folder])
-        elif index_folder >= 0:# If the extract contain the folder name itself
+        elif index_folder >= 0:  # If the extract contain the folder name itself
             archive_to_copy = os.path.join(archive, list_dir[index_folder])
             futur_path = self.ff8_path
+
         else:
             archive_to_copy = archive
             futur_path = self.ff8_path
-
-
-        shutil.copytree(archive_to_copy, futur_path, dirs_exist_ok=True)
-
-
+        print("Archive to copy: {}, futur path: {}".format(archive_to_copy, futur_path))
+        shutil.copytree(archive_to_copy, futur_path, dirs_exist_ok=True, copy_function=shutil.copy)
         if archive != "":
             shutil.rmtree(archive)
         # remove_test_file()
@@ -208,8 +195,7 @@ class ModManager():
         if mod_name in self.LIST_MOD_TO_BE_SETUP:
             if not os.path.join(self.ff8_path, "FFNx.toml"):
                 with open(os.path.join(self.ff8_path, "FFNx.toml"), "w") as file:
-                   pass
-            # TODO Check if toml file exist
+                    pass
             self.ffnx_manager.read_ffnx_setup_file(ff8_path=self.ff8_path)
             if mod_name == "FFNx-FFNxFF8Music":
                 self.ffnx_manager.change_ffnx_music_option()
