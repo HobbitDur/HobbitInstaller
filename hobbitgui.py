@@ -96,7 +96,7 @@ class WindowInstaller(QWidget):
         self.install_over.hide()
 
         # Button Update link data
-        self.update_data_button = QPushButton(parent=self, text="Updating data")
+        self.update_data_button = QPushButton(parent=self, text="Updating mod list")
         self.update_data_button.clicked.connect(self.update_data_click)
         self.update_data_over = QMessageBox(parent=self)
         self.update_data_over.setWindowTitle("Updating data over!")
