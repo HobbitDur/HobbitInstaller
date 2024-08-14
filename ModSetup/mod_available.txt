@@ -2,9 +2,10 @@ DefaultFilesFR
 DefaultFilesEN
 DefaultFilesDE
 FFNx
+FF78Launcher
 FFNxFF8Music
 FFNx-RoseAndWine
-FF78Launcher
+FFNx-OST-RF
 FFNxBattlefields
 FFNxLunarCry
 FFNxTripod

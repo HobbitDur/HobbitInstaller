@@ -5,6 +5,7 @@ class FFNxManager():
     FFNX_FILE_SETUP = "FFNx.toml"
     MUSIC_FFNX_PARAM_CHANGE = {'use_external_music': 'true', 'external_music_path': '"psf"', 'external_music_ext': '"minipsf"', 'he_bios_path': '"psf/hebios.bin"'}
     MUSIC_ROSE_WINE_PARAM_CHANGE = {'use_external_music': 'true', 'external_music_path': '"music"', 'external_music_ext': '"ogg"', 'he_bios_path': '"psf/hebios.bin"'}
+    MUSIC_OST_RF_PARAM_CHANGE = {'use_external_music': 'true', 'external_music_path': '"music"', 'external_music_volume': '"75"', 'external_music_sync': '"true"'}
 
     def __init__(self):
         self.ffnx_setup = []
@@ -29,6 +30,13 @@ class FFNxManager():
     def change_rosewine_music_option(self):
         for i, line in enumerate(self.ffnx_setup):
             for param, value in self.MUSIC_ROSE_WINE_PARAM_CHANGE.items():
+                if param in line and '=' in line:
+                    line_split = line.split('=')
+                    self.ffnx_setup[i] = line_split[0] + "=" + value + "#Value changed by HobbitInstaller"
+
+    def change_ost_rf_music_option(self):
+        for i, line in enumerate(self.ffnx_setup):
+            for param, value in self.MUSIC_OST_RF_PARAM_CHANGE.items():
                 if param in line and '=' in line:
                     line_split = line.split('=')
                     self.ffnx_setup[i] = line_split[0] + "=" + value + "#Value changed by HobbitInstaller"
