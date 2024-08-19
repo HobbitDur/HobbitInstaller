@@ -270,7 +270,7 @@ class ModManager():
                 with open(os.path.join(self.ff8_path, "FFNx.toml"), "w") as file:
                     pass
             self.ffnx_manager.read_ffnx_setup_file(ff8_path=self.ff8_path)
-            if mod_name == "FFNx-FFNxFF8Music":
+            if mod_name == "FFNxFF8Music":
                 self.ffnx_manager.change_ffnx_music_option()
             elif mod_name == "FFNx-RoseAndWine":
                 self.ffnx_manager.change_rosewine_music_option()

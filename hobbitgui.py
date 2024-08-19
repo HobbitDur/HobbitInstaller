@@ -32,7 +32,7 @@ class WindowInstaller(QWidget):
     FF8_RELOAD_NAME = "FFVIII-Reloaded-FR-ONLY"
     RAGNAROK_NAME = "Ragnarok-EN-ONLY"
     LIST_SPECIAL_MOD = [FF8_RELOAD_NAME, RAGNAROK_NAME]
-    MOD_CHECK_DEFAULT = ['FFNx', 'FF78Launcher', 'FFNx-OST-RF']
+    MOD_CHECK_DEFAULT = ['FFNx', 'FF78Launcher', 'Tsunamods-OST-RF']
     def __init__(self, mod_manager, icon_path='Resources'):
 
         QWidget.__init__(self)
