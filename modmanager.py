@@ -22,7 +22,7 @@ class ModManager():
     MOD_AVAILABLE_FILE = 'mod_available.txt'
     MOD_FILE_NAME = 'mod_file_name.txt'
     MOD_NAME_LIST = 'mod_name_list.txt'
-    LIST_MOD_TO_BE_SETUP = ['FFNxFF8Music', 'FFNx-RoseAndWine', 'FFNx-OST-RF']
+    LIST_MOD_TO_BE_SETUP = ['FFNxFF8Music', 'FFNx-RoseAndWine', 'Tsunamods-OST-RF']
     UPDATE_DATA_NAME = "UpdateData"
 
     def __init__(self, ff8_path='.'):
