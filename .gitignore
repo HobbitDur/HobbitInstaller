@@ -241,8 +241,6 @@ ModelManifest.xml
 # FAKE - F# Make
 .fake/
 
-**/.idea
-
 **/OutputFiles/
 **/__pycache__/
 **/decompressed_battle/

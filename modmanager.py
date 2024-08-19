@@ -51,11 +51,11 @@ class ModManager():
         self.buffer_tag_mod.clear()
         self.buffer_direct_link_mod.clear()
         with (open(self.GIT_MOD_FILE, "r") as f):
-            self.buffer_git_list_mod = f.read().split('\n')
+            self.buffer_git_list_mod = [x for x in f.read().split('\n') if x]
         with (open(self.GIT_TAG_FILE, "r") as f):
-            self.buffer_tag_mod = f.read().split('\n')
+            self.buffer_tag_mod = [x for x in f.read().split('\n') if x]
         with (open(self.DIRECT_LINK_FILE, "r") as f):
-            self.buffer_direct_link_mod = f.read().split('\n')
+            self.buffer_direct_link_mod = [x for x in f.read().split('\n') if x]
         if len(self.buffer_git_list_mod) != len(self.buffer_tag_mod):
             raise ValueError("The file {} and file {} doesn't have the same number of line !".format(self.GIT_MOD_FILE,
                                                                                                      self.GIT_TAG_FILE))
@@ -213,9 +213,6 @@ class ModManager():
                 zip_ref.extractall(archive)
         list_dir = os.listdir(archive)
         try:
-            print(os.listdir(archive))
-            print(dd_file_name)
-            print(os.listdir(archive).index(dd_file_name.split('.')[0]))
             index_folder = os.listdir(archive).index(dd_file_name.split('.')[0])
 
         except ValueError:
@@ -268,13 +265,20 @@ class ModManager():
             shutil.rmtree(self.FOLDER_DOWNLOAD)
 
         if mod_name in self.LIST_MOD_TO_BE_SETUP:
+            print("Updating FFNx.toml file for mod {}".format(mod_name))
             if not os.path.join(self.ff8_path, "FFNx.toml"):
                 with open(os.path.join(self.ff8_path, "FFNx.toml"), "w") as file:
                     pass
             self.ffnx_manager.read_ffnx_setup_file(ff8_path=self.ff8_path)
             if mod_name == "FFNx-FFNxFF8Music":
                 self.ffnx_manager.change_ffnx_music_option()
-            if mod_name == "FFNx-RoseAndWine":
+            elif mod_name == "FFNx-RoseAndWine":
                 self.ffnx_manager.change_rosewine_music_option()
+            elif mod_name == "FFNx-OST-RF":
+                self.ffnx_manager.change_ost_rf_music_option()
 
             self.ffnx_manager.write_ffnx_setup_file(self.ff8_path)
+
+    def update_data(self):
+        self.install_mod(self.UPDATE_DATA_NAME)
+        self.__init_mod_data()
