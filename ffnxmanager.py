@@ -29,13 +29,9 @@ class FFNxManager():
         self.__change_music_option(self.MUSIC_OST_RF_PARAM_CHANGE.items())
 
     def __change_music_option(self, music_items):
-        print(music_items)
         for i, line in enumerate(self.ffnx_setup):
             for param, value in music_items:
                 if param in line and '=' in line:
-                    print(line)
-                    print(param)
-                    print(value)
                     line_split = line.split('=')
                     self.ffnx_setup[i] = line_split[0] + "=" + value + "#Value changed by HobbitInstaller"
 
