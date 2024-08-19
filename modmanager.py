@@ -274,7 +274,7 @@ class ModManager():
                 self.ffnx_manager.change_ffnx_music_option()
             elif mod_name == "FFNx-RoseAndWine":
                 self.ffnx_manager.change_rosewine_music_option()
-            elif mod_name == "FFNx-OST-RF":
+            elif mod_name == "Tsunamods-OST-RF":
                 self.ffnx_manager.change_ost_rf_music_option()
 
             self.ffnx_manager.write_ffnx_setup_file(self.ff8_path)

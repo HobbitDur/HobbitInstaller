@@ -4,7 +4,7 @@ DefaultFilesDE.zip
 FFNx-Steam-v1.19.1.0.zip
 FF78Launcher-v0.1.0.0.zip
 FFNx-FF8Music-v1.5.zip
-FFNx-RoseAndWine.rar
+FFNx-RoseAndWine.zip
 OST-RF v1.0 FFNx.zip
 FFNxBattlefields.rar
 FFNxLunarCry.rar
