@@ -5,7 +5,7 @@ from PyQt6 import sip
 from PyQt6.QtCore import Qt, QCoreApplication, QThreadPool, QRunnable, QObject, pyqtSignal, pyqtSlot, QThread
 from PyQt6.QtGui import QIcon
 from PyQt6.QtWidgets import QApplication, QWidget, QPushButton, QVBoxLayout, QCheckBox, QMessageBox, QProgressDialog, QMainWindow, QProgressBar, QRadioButton, \
-    QLabel, QFrame, QStyle, QSizePolicy, QButtonGroup
+    QLabel, QFrame, QStyle, QSizePolicy, QButtonGroup, QComboBox, QHBoxLayout
 
 from modmanager import ModManager
 
@@ -21,10 +21,12 @@ class Installer(QObject):
             mod_manager.install_mod(mod_name, keep_downloaded_mod, special_status, download)
             self.progress.emit(index + 1)
         self.completed.emit(len(mod_to_be_installed))
+
     @pyqtSlot(ModManager)
     def update_data(self, mod_manager):
         mod_manager.update_data()
         self.update_data_completed.emit()
+
 
 class WindowInstaller(QWidget):
     install_requested = pyqtSignal(ModManager, list, bool, dict, bool)
@@ -33,6 +35,9 @@ class WindowInstaller(QWidget):
     RAGNAROK_NAME = "Ragnarok-EN-ONLY"
     LIST_SPECIAL_MOD = [FF8_RELOAD_NAME, RAGNAROK_NAME]
     MOD_CHECK_DEFAULT = ['FFNx', 'FF78Launcher', 'Tsunamods-OST-RF']
+    VERSION_LIST = ["FF8 Steam 2013", "FF8 Remastered"]
+    LANG_LIST = ["en", "fr", "de"]
+
     def __init__(self, mod_manager, icon_path='Resources'):
 
         QWidget.__init__(self)
@@ -61,6 +66,8 @@ class WindowInstaller(QWidget):
 
         self.layout_main = QVBoxLayout()
         self.layout_setup = QVBoxLayout()
+        self.layout_ff8_version = QHBoxLayout()
+        self.layout_language = QHBoxLayout()
         self.layout_mod = QVBoxLayout()
         self.layout_ragnarok = QVBoxLayout()
         self.layout_ff8reloaded = QVBoxLayout()
@@ -73,12 +80,13 @@ class WindowInstaller(QWidget):
                 item = layout.itemAt(i)
                 widget = item.widget()
                 if widget:
-                    #widget.setParent(None)
+                    # widget.setParent(None)
                     sip.delete(widget)
+
     def __clear_layout(self):
-        #self.__clear_one_layout(self.layout_setup)
+        # self.__clear_one_layout(self.layout_setup)
         self.__clear_one_layout(self.layout_mod)
-        #self.__clear_one_layout(self.layout_main)
+        # self.__clear_one_layout(self.layout_main)
         self.__clear_one_layout(self.layout_ragnarok)
         self.__clear_one_layout(self.layout_ff8reloaded)
         self.layout_mod = QVBoxLayout()
@@ -112,10 +120,19 @@ class WindowInstaller(QWidget):
         self.keep_mod_archive = QCheckBox(parent=self, text="Keep mod_archive")
         self.keep_mod_archive.setChecked(False)
 
+        self.ff8_version_label = QLabel(parent=self, text="FF8 Version")
+        self.ff8_version = QComboBox(parent=self)
+        self.ff8_version.addItems(self.VERSION_LIST)
+        self.ff8_version.activated.connect(self.reload_gui)
+
+        self.language_label = QLabel(parent=self, text="FF8 language")
+        self.language = QComboBox(parent=self)
+        self.language.addItems(self.LANG_LIST)
+        self.language.activated.connect(self.reload_gui)
+
         self.separator = QFrame(self)
         self.separator.setFrameStyle(0x04)  # Can't find QFrame.HLine so here we are
         self.separator.setLineWidth(2)
-
 
     def __setup_mod(self):
         self.label_mod = QLabel("Mod selection")
@@ -150,28 +167,39 @@ class WindowInstaller(QWidget):
 
         self.__reset_mod_loaded()
 
-
     def __reset_mod_loaded(self):
         self.mod_checkbox.clear()
-        for mod_name in self.mod_manager.mod_file_list:
-            if self.mod_manager.mod_dict[mod_name]['type'] == 'github':
-                self.mod_checkbox[mod_name] = QCheckBox(parent=self, text=mod_name)
-            elif self.mod_manager.mod_dict[mod_name]['type'] == 'direct_link':
-                self.mod_checkbox[mod_name] = QCheckBox(parent=self, text=mod_name)
-            else:
-                print("No type found for mod {} with value {}".format(mod_name, self.mod_manager.mod_dict[mod_name]))
-            if mod_name in self.MOD_CHECK_DEFAULT:
-                self.mod_checkbox[mod_name].setChecked(True)
-            if mod_name == self.FF8_RELOAD_NAME:
-                self.mod_checkbox[mod_name].toggled.connect(self.activate_ff8reload)
-            elif mod_name == self.RAGNAROK_NAME:
-                self.mod_checkbox[mod_name].toggled.connect(self.activate_ragnarok)
+        for mod_name, mod_info in self.mod_manager.mod_dict_json.items():
+            if mod_name != "UpdateData":  # It's our "local mod" to update the setup.json
+                if mod_info["download_type"] == 'github' or mod_info["download_type"] == 'direct':
+                    if self.language.currentText() in mod_info["lang"]:
+                        if (self.ff8_version.currentText() == self.VERSION_LIST[0] and "ffnx" in mod_info["compatibility"]) \
+                                or (self.ff8_version.currentText() == self.VERSION_LIST[1] and "demaster" in mod_info["compatibility"]):
+                            self.mod_checkbox[mod_name] = QCheckBox(parent=self, text=mod_name)
+                            if mod_name in self.MOD_CHECK_DEFAULT:
+                                self.mod_checkbox[mod_name].setChecked(True)
+                            if mod_name == self.FF8_RELOAD_NAME:
+                                self.mod_checkbox[mod_name].toggled.connect(self.activate_ff8reload)
+                            elif mod_name == self.RAGNAROK_NAME:
+                                self.mod_checkbox[mod_name].toggled.connect(self.activate_ragnarok)
+                else:
+                    print("No type found for mod {} with value {}".format(mod_name, self.mod_manager.mod_dict[mod_name]))
 
     def __setup_setup_layout(self):
         self.layout_setup.addWidget(self.label_setup)
+        self.layout_ff8_version.addWidget(self.ff8_version_label)
+        self.layout_ff8_version.addWidget(self.ff8_version)
+        self.layout_ff8_version.addStretch(1)
+        self.layout_language.addWidget(self.language_label)
+        self.layout_language.addWidget(self.language)
+        self.layout_language.addStretch(1)
+
+        self.layout_setup.addLayout(self.layout_language)
+        self.layout_setup.addLayout(self.layout_ff8_version)
         self.layout_setup.addWidget(self.download)
         self.layout_setup.addWidget(self.keep_mod_archive)
         self.layout_setup.addWidget(self.separator)
+
     def __setup_mod_layout(self):
         self.layout_mod.addWidget(self.label_mod)
         for key, mod in self.mod_checkbox.items():
@@ -193,14 +221,15 @@ class WindowInstaller(QWidget):
             self.layout_mod.addLayout(self.layout_ff8reloaded)
         if self.RAGNAROK_NAME in self.mod_checkbox:
             self.layout_mod.addLayout(self.layout_ragnarok)
+
     def __setup_main_layout(self):
         self.layout_main.addLayout(self.layout_setup)
         self.layout_main.addLayout(self.layout_mod)
         self.layout_main.addWidget(self.update_data_button)
         self.layout_main.addWidget(self.install_button)
         self.layout_main.addWidget(self.progress)
+        self.layout_main.addStretch(1)
         self.setLayout(self.layout_main)
-
 
     def activate_ff8reload(self):
         if self.mod_checkbox[self.FF8_RELOAD_NAME].isChecked():
@@ -212,6 +241,7 @@ class WindowInstaller(QWidget):
             self.ff8reloaded_level1.hide()
             self.ff8reloaded_level100.hide()
         self.resize(self.minimumSizeHint())
+
     def activate_ragnarok(self):
         if self.mod_checkbox[self.RAGNAROK_NAME].isChecked():
             self.ragnarok_standard.show()
@@ -223,6 +253,7 @@ class WindowInstaller(QWidget):
 
     def ff8reloadedstate(self, b):
         pass
+
     def ragnarokstate(self, b):
         pass
 
@@ -239,8 +270,7 @@ class WindowInstaller(QWidget):
 
         self.__setup_mod_layout()
         self.__setup_main_layout()
-        #self.resize(self.minimumSizeHint())
-
+        # self.resize(self.minimumSizeHint())
 
     def install_click(self):
 
@@ -262,7 +292,7 @@ class WindowInstaller(QWidget):
                     special_status[self.RAGNAROK_NAME] = self.ragnarok_lionheart.text()
             if self.mod_checkbox[mod_name].checkState() == Qt.CheckState.Checked:
                 mod_to_be_installed.append(mod_name)
-        self.progress.setRange(0, len(mod_to_be_installed)+1)
+        self.progress.setRange(0, len(mod_to_be_installed) + 1)
         self.progress.setValue(1)
         download = self.download.isChecked()
         self.install_requested.emit(self.mod_manager, mod_to_be_installed, self.keep_mod_archive.isChecked(), special_status, download)
@@ -274,25 +304,25 @@ class WindowInstaller(QWidget):
         self.update_data_requested.emit(self.mod_manager)
 
     def install_progress(self, nb_install_done):
-        self.progress.setValue(nb_install_done+1)
+        self.progress.setValue(nb_install_done + 1)
 
     def install_completed(self, nb_install_done):
-        self.progress.setValue(nb_install_done+1)
+        self.progress.setValue(nb_install_done + 1)
         self.progress.hide()
         self.install_over.show()
         self.resize(self.minimumSizeHint())
+
     def update_data_completed(self):
         self.progress.setValue(1)
         self.progress.hide()
         self.update_data_over.show()
+        self.reload_gui()
+
+    def reload_gui(self):
         self.__clear_layout()
-        #self.__setup_setup()
         self.__setup_mod()
-        #self.__setup_main()
         self.__reset_mod_loaded()
         self.__setup_mod_layout()
         self.layout_main.insertLayout(1, self.layout_mod)
-
         self.show_all()
         self.resize(self.minimumSizeHint())
-

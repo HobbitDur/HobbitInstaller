@@ -1,4 +1,5 @@
 import glob
+import json
 import os
 import re
 import shutil
@@ -10,12 +11,12 @@ import requests
 
 
 class ModManager():
-    GIT_MOD_FILE = os.path.join("ModSetup", "git_mod_list.txt")
-    GIT_TAG_FILE = os.path.join("ModSetup", "git_tag.txt")
-    DIRECT_LINK_FILE = os.path.join("ModSetup", "direct_link.txt")
+    FOLDER_SETUP = "ModSetup"
+    GIT_MOD_FILE = os.path.join(FOLDER_SETUP, "git_mod_list.txt")
+    GIT_TAG_FILE = os.path.join(FOLDER_SETUP, "git_tag.txt")
+    DIRECT_LINK_FILE = os.path.join(FOLDER_SETUP, "direct_link.txt")
     SEP_CHAR = '>'
     FOLDER_DOWNLOAD = "ModDownloaded"
-    FOLDER_SETUP = "ModSetup"
     TYPE_DOWNLOAD = 'Steam'
     GITHUB_RELEASE_TAG_PATH = "/releases/tag/"
     GITHUB_RELEASE_PATH = "/releases"
@@ -24,80 +25,19 @@ class ModManager():
     MOD_NAME_LIST = 'mod_name_list.txt'
     LIST_MOD_TO_BE_SETUP = ['FFNxFF8Music', 'FFNx-RoseAndWine', 'Tsunamods-OST-RF']
     UPDATE_DATA_NAME = "UpdateData"
+    SETUP_FILE = os.path.join(FOLDER_SETUP, "setup.json")
 
     def __init__(self, ff8_path='.'):
-        self.buffer_git_list_mod = []
-        self.buffer_tag_mod = []
-        self.buffer_direct_link_mod = []
-        self.mod_dict = {}
-        self.mod_file_list = []
-        self.mod_list_file_name = []
-        self.github_mod_list = []
-        self.direct_link_mod_list = []
         self.ffnx_manager = FFNxManager()
         os.makedirs(self.FOLDER_DOWNLOAD, exist_ok=True)
         self.ff8_path = ff8_path
+        self.mod_dict_json = {}
         self.__init_mod_data()
 
     def __init_mod_data(self):
-        self.__read_setup_files()
-        self.__load_mod_list()
-        self.__load_github_info()
-        self.__load_direct_link_info()
-        self.__load_mod_file_name()
-
-    def __read_setup_files(self):
-        self.buffer_git_list_mod.clear()
-        self.buffer_tag_mod.clear()
-        self.buffer_direct_link_mod.clear()
-        with (open(self.GIT_MOD_FILE, "r") as f):
-            self.buffer_git_list_mod = [x for x in f.read().split('\n') if x]
-        with (open(self.GIT_TAG_FILE, "r") as f):
-            self.buffer_tag_mod = [x for x in f.read().split('\n') if x]
-        with (open(self.DIRECT_LINK_FILE, "r") as f):
-            self.buffer_direct_link_mod = [x for x in f.read().split('\n') if x]
-        if len(self.buffer_git_list_mod) != len(self.buffer_tag_mod):
-            raise ValueError("The file {} and file {} doesn't have the same number of line !".format(self.GIT_MOD_FILE,
-                                                                                                     self.GIT_TAG_FILE))
-
-    def __load_mod_file_name(self):
-        self.mod_list_file_name.clear()
-        with open(os.path.join(self.FOLDER_SETUP, self.MOD_FILE_NAME), "r") as file:
-            self.mod_list_file_name.extend(file.read().split('\n'))
-            self.mod_list_file_name = [x for x in self.mod_list_file_name if x != '']
-
-    def __load_mod_list(self):
-        self.mod_file_list.clear()
-        with open(os.path.join(self.FOLDER_SETUP, self.MOD_AVAILABLE_FILE), "r") as file:
-            self.mod_file_list.extend(file.read().split('\n'))
-            self.mod_file_list = [x for x in self.mod_file_list if x != '']
-
-    def __load_github_info(self):
-        # Loading github info for all github mod
-        self.github_mod_list.clear()
-        self.mod_dict.clear()
-        for i in range(len(self.buffer_git_list_mod)):
-            current_mod = self.buffer_git_list_mod[i].split(self.SEP_CHAR)[0]
-            # Searching the corresponding tag
-            current_mod_tag = [x.split(self.SEP_CHAR)[1] for x in self.buffer_tag_mod if
-                               x.split(self.SEP_CHAR)[0] == current_mod]
-            if not current_mod_tag or len(current_mod_tag) > 1:
-                print("No correspondance between the tag and the mod in github file")
-            else:
-                current_mod_tag = current_mod_tag[0]
-            self.github_mod_list.append(current_mod)
-            self.mod_dict[current_mod] = {'type': 'github',
-                                          'mod_name': self.buffer_git_list_mod[i].split(self.SEP_CHAR)[0],
-                                          'github': self.buffer_git_list_mod[i].split(self.SEP_CHAR)[1],
-                                          'tag': current_mod_tag}
-
-    def __load_direct_link_info(self):
-        # Loading link info for all direct link mod
-        self.direct_link_mod_list.clear()
-        for direct_mod in self.buffer_direct_link_mod:
-            current_mod = direct_mod.split(self.SEP_CHAR)[0]
-            self.mod_dict[current_mod] = {'type': 'direct_link', 'link': direct_mod.split(self.SEP_CHAR)[1]}
-            self.direct_link_mod_list.append(current_mod)
+        with open(self.SETUP_FILE) as f:
+            self.mod_dict_json = json.load(f)['AvailableMods']
+            #self.mod_dict_json = self.mod_dict_json['AvailableMods']
 
     def download_file(self, link, headers={}, write_file=False, file_name=None, dest_path=FOLDER_DOWNLOAD):
         print("Downloading with link: {}".format(link))
@@ -123,30 +63,26 @@ class ModManager():
             print("Fail to download {}".format(link))
         return request_return, file_name
 
-
     def save_local_file(self, lang="en"):
         path_to_files = os.path.join(self.ff8_path, 'Data', 'lang-' + lang)
 
-
     def __get_github_link(self, mod_name: str):
-        github_link = self.mod_dict[mod_name]['github'] + self.GITHUB_RELEASE_PATH
+        github_link = self.mod_dict_json[mod_name]['link'] + self.GITHUB_RELEASE_PATH
         github_link = github_link.replace('github.com', 'api.github.com/repos')
         return github_link
-
 
     def __get_github_url_file(self, mod_name: str, json_url="assets_url"):
         json_link = self.__get_github_link(mod_name)
         json_file = self.download_file(json_link, headers={'content-type': 'application/json'})[0]
         json_file = json_file.json()
         dd_url = ""
-        if self.mod_dict[mod_name]['tag'] == 'latest':
+        if self.mod_dict_json[mod_name]['git_tag'] == 'latest':
             dd_url = json_file[0][json_url]
         else:  # Searching the tag
             for el in json_file:
-                if el['tag_name'] == self.mod_dict[mod_name]['tag']:
+                if el['tag_name'] == self.mod_dict_json[mod_name]['git_tag']:
                     dd_url = el[json_url]
         return dd_url
-
 
     def install_mod(self, mod_name: str, keep_download_mod=False, special_status={}, download=True):
         os.makedirs(self.FOLDER_DOWNLOAD, exist_ok=True)
@@ -154,7 +90,7 @@ class ModManager():
         if mod_name == self.UPDATE_DATA_NAME:
             dd_url = self.__get_github_url_file(self.UPDATE_DATA_NAME, "zipball_url")
             dd_file_name = self.download_file(dd_url, write_file=True)[1]
-        elif mod_name in self.github_mod_list:
+        elif self.mod_dict_json[mod_name]["download_type"] == "github":
             if download:
                 dd_url = self.__get_github_url_file(mod_name, "assets_url")
                 json_file = self.download_file(dd_url, headers={'content-type': 'application/json'})[0].json()
@@ -170,27 +106,27 @@ class ModManager():
                     print("Didn't manage several asset without a particular case")
                 dd_file_name = self.download_file(asset_link, write_file=True)[1]
             else:
-                dd_file_name = self.mod_list_file_name[self.mod_file_list.index(mod_name)]
-        elif mod_name in self.direct_link_mod_list:
-            direct_file = self.mod_dict[mod_name]['link']
+                dd_file_name = self.mod_dict_json["download_name"]
+        elif self.mod_dict_json[mod_name]["download_type"] == "direct":
+            direct_file = self.mod_dict_json[mod_name]['link']
             if mod_name == "FFNxFF8Music":  # need remove " around
-                dd_file_name = direct_file.split('/')[-1]
+                dd_file_name = self.mod_dict_json[mod_name]["download_name"]
             else:
                 dd_file_name = None
             if download:
                 dd_file_name = self.download_file(direct_file, write_file=True, file_name=dd_file_name)[1]
             else:
-                dd_file_name = self.mod_list_file_name[self.mod_file_list.index(mod_name)]
+                dd_file_name = self.mod_dict_json[mod_name]["download_name"]
         else:
             raise ValueError("Unexpected ELSE")
 
         # Trying to make auto naming instead of having to modify manually a file
 
-        #if keep_download_mod and download:# If we keep the files downloaded, then keep a link between the downloaded name and the mod name
+        # if keep_download_mod and download:# If we keep the files downloaded, then keep a link between the downloaded name and the mod name
         #    with open(os.path.join(self.FOLDER_DOWNLOAD, self.MOD_NAME_LIST), "a+") as file:
         #        file.write(self.mod_list_file_name[self.mod_file_list.index(mod_name)] + self.SEP_CHAR + dd_file_name)
 
-        #elif not download: # Means we get it from local folder, so we use the files link
+        # elif not download: # Means we get it from local folder, so we use the files link
         #    with open(os.path.join(self.FOLDER_DOWNLOAD, self.MOD_NAME_LIST), "r") as file:
         #        file_data = file.read()
         #        file_data = file_data.split("\n")
