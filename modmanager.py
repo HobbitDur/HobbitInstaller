@@ -205,15 +205,10 @@ class ModManager():
             if not os.path.join(self.ff8_path, "FFNx.toml"):
                 with open(os.path.join(self.ff8_path, "FFNx.toml"), "w") as file:
                     pass
-            self.ffnx_manager.read_ffnx_setup_file(ff8_path=self.ff8_path)
-            if mod_name == "FFNxFF8Music":
-                self.ffnx_manager.change_ffnx_music_option()
-            elif mod_name == "FFNx-RoseAndWine":
-                self.ffnx_manager.change_rosewine_music_option()
-            elif mod_name == "Tsunamods-OST-RF":
-                self.ffnx_manager.change_ost_rf_music_option()
-
-            self.ffnx_manager.write_ffnx_setup_file(self.ff8_path)
+            ffnx_param = self.mod_dict_json[mod_name]["ffnx_param"]
+            print(ffnx_param)
+            if ffnx_param:
+                self.ffnx_manager.change_ffnx_option(ffnx_param, self.ff8_path)
 
     def update_data(self):
         self.install_mod(self.UPDATE_DATA_NAME)
