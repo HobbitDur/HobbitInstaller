@@ -16,10 +16,10 @@ class Installer(QObject):
     completed = pyqtSignal(int)
     update_data_completed = pyqtSignal()
 
-    @pyqtSlot(ModManager, list, bool, dict, bool)
-    def install(self, mod_manager, mod_to_be_installed, keep_downloaded_mod, special_status={}, download=True):
+    @pyqtSlot(ModManager, list, bool, dict, bool, str)
+    def install(self, mod_manager, mod_to_be_installed, keep_downloaded_mod, special_status={}, download=True, ff8_version="ffnx"):
         for index, mod_name in enumerate(mod_to_be_installed):
-            mod_manager.install_mod(mod_name, keep_downloaded_mod, special_status, download)
+            mod_manager.install_mod(mod_name, keep_downloaded_mod, special_status, download, ff8_version)
             self.progress.emit(index + 1)
         self.completed.emit(len(mod_to_be_installed))
 
@@ -30,7 +30,7 @@ class Installer(QObject):
 
 
 class WindowInstaller(QWidget):
-    install_requested = pyqtSignal(ModManager, list, bool, dict, bool)
+    install_requested = pyqtSignal(ModManager, list, bool, dict, bool, str)
     update_data_requested = pyqtSignal(ModManager)
     FF8_RELOAD_NAME = "FFVIII-Reloaded-FR-ONLY"
     RAGNAROK_NAME = "Ragnarok-EN-ONLY"
@@ -227,7 +227,8 @@ class WindowInstaller(QWidget):
         self.layout_setup.addLayout(self.layout_language)
         self.layout_setup.addLayout(self.layout_ff8_version)
         self.layout_setup.addLayout(self.layout_mod_type)
-        self.layout_setup.addWidget(self.download)
+        #self.layout_setup.addWidget(self.download)
+        self.download.hide()
         self.layout_setup.addWidget(self.keep_mod_archive)
         self.layout_setup.addWidget(self.separator)
 
@@ -328,8 +329,14 @@ class WindowInstaller(QWidget):
         self.progress.setRange(0, len(mod_to_be_installed) + 1)
         self.progress.setValue(1)
         download = self.download.isChecked()
+        if self.ff8_version.currentText() == self.VERSION_LIST[0]:
+            ff8_version = "ffnx"
+        elif self.ff8_version.currentText() == self.VERSION_LIST[1]:
+            ff8_version = "demaster"
+        else:
+            ff8_version = ""
         self.install_requested.emit(self.mod_manager, mod_to_be_installed, self.keep_mod_archive.isChecked(),
-                                    special_status, download)
+                                    special_status, download, ff8_version)
 
     def update_data_click(self):
         self.progress.show()

@@ -92,6 +92,26 @@
         "de"
       ]
     },
+      "Demaster": {
+      "download_type": "github",
+      "download_name": "none",
+      "link": "https://github.com/MaKiPL/FF8_demaster",
+      "git_tag": "1.3.3",
+      "rank": "31",
+      "compatibility": [
+        "demaster"
+      ],
+      "modder_name": "MaKiPL",
+      "mod_info": "Low level tools to interface with the game",
+      "mod_type": "Wrapper",
+      "default_selected": "true",
+      "ffnx_param": {},
+      "lang": [
+        "en",
+        "fr",
+        "de"
+      ]
+    },
     "FF78Launcher": {
       "download_type": "github",
       "download_name": "none",
@@ -162,14 +182,15 @@
         "de"
       ]
     },
-    "Tsunamods-FFNx-OST-RF": {
+    "Tsunamods-OST-RF": {
       "download_type": "direct",
       "download_name": "OST-RF v1.0 FFNx.zip",
       "link": "https://download.tsunamods.com/?id=12",
+      "remaster-link": "https://download.tsunamods.com/?id=11",
       "git_tag": "none",
       "rank": "70",
       "compatibility": [
-        "ffnx"
+        "ffnx", "demaster"
       ],
       "modder_name": "MikeDoesAudio",
       "mod_info": "Original SoundTrack ReFined by a professional mixer",
