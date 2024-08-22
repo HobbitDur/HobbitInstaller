@@ -35,7 +35,6 @@ class WindowInstaller(QWidget):
     FF8_RELOAD_NAME = "FFVIII-Reloaded-FR-ONLY"
     RAGNAROK_NAME = "Ragnarok-EN-ONLY"
     LIST_SPECIAL_MOD = [FF8_RELOAD_NAME, RAGNAROK_NAME]
-    MOD_CHECK_DEFAULT = ['FFNx', 'FF78Launcher', 'Tsunamods-OST-RF']
     VERSION_LIST = ["FF8 Steam 2013", "FF8 Remastered"]
     LANG_LIST = ["en", "fr", "de"]
     MOD_TYPE_LIST = ["All", "Wrapper", "Graphical", "Music", "Gameplay", "EaseOfLife"]
@@ -108,6 +107,8 @@ class WindowInstaller(QWidget):
         # Button Update link data
         self.update_data_button = QPushButton(parent=self, text="Updating mod list")
         self.update_data_button.clicked.connect(self.update_data_click)
+        self.update_data_button.setToolTip("Update mod list, version available and link")
+
         self.update_data_over = QMessageBox(parent=self)
         self.update_data_over.setWindowTitle("Updating data over!")
         self.update_data_over.setText("Updating data over!")
@@ -195,14 +196,13 @@ class WindowInstaller(QWidget):
                     if self.language.currentText() in mod_info["lang"]:
                         if (self.ff8_version.currentText() == self.VERSION_LIST[0] and "ffnx" in mod_info[
                             "compatibility"]) \
-                                or (self.ff8_version.currentText() == self.VERSION_LIST[1] and "demaster" in mod_info[
-                            "compatibility"]):
+                                or (self.ff8_version.currentText() == self.VERSION_LIST[1] and "demaster" in mod_info["compatibility"]):
                             if self.mod_type.currentText() == "All" or (
                                     self.mod_type.currentText() == mod_info["mod_type"]):
                                 self.mod_checkbox[mod_name] = QCheckBox(parent=self, text=mod_name)
                                 self.mod_checkbox[mod_name].setToolTip(
                                     "Author: {}\nDescription: {}".format(mod_info["modder_name"], mod_info["mod_info"]))
-                                if mod_name in self.MOD_CHECK_DEFAULT:
+                                if mod_info["default_selected"] == "true":
                                     self.mod_checkbox[mod_name].setChecked(True)
                                 if mod_name == self.FF8_RELOAD_NAME:
                                     self.mod_checkbox[mod_name].toggled.connect(self.activate_ff8reload)
