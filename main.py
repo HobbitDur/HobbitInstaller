@@ -136,12 +136,18 @@ if __name__ == '__main__':
             json_file = download_file(assets_url, headers={'content-type': 'application/json'})
             json_file = json_file.json()
             asset_link = ""
-            for el in json_file:
-                if TYPE_DOWNLOAD in el['browser_download_url']:
-                    asset_link = el['browser_download_url']
-                    break
+            if mod_name == 'FFNx':
+                for el in json_file:
+                    if TYPE_DOWNLOAD in el['browser_download_url']:
+                        asset_link = el['browser_download_url']
+                        break
+            elif len(json_file) == 1:
+                asset_link = json_file[0]['browser_download_url']
+            else:
+                print("Didn't manage several asset without a particuliar case")
 
             dd_file_name = asset_link.split('/')[-1]
+
             download_file(asset_link, write_file=True)
         elif mod_name in direct_link_mod_list:
 
