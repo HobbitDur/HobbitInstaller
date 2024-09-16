@@ -95,7 +95,10 @@ class ModManager():
             print("Fail to download {}".format(link))
         return request_return, file_name
 
+    def save_local_file(self, lang="en"):
+        path_to_files = os.path.join(self.ff8_path, 'Data', 'lang-'+lang)
     def install_mod(self,mod_name:str, keep_download_mod=False, special_status={}, download=True):
+        os.makedirs(self.FOLDER_DOWNLOAD, exist_ok=True)
         if mod_name in self.github_mod_list:
             if download:
                 json_link = self.mod_dict[mod_name]['github'] + self.GITHUB_RELEASE_PATH
@@ -141,7 +144,6 @@ class ModManager():
                 dd_file_name = "FFNxTripod.rar"
             elif mod_name == "FFNxFF8Music":  # need remove " around
                 dd_file_name = direct_file.split('/')[-1]
-
             else:
                 dd_file_name = None
             if download:
