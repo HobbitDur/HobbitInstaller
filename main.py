@@ -73,7 +73,7 @@ def write_ffnx_setup_file(ff8_path, ffnx_setup):
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(prog="Hobbit Installer", description="This program install mode for FF8")
-    parser.add_argument("path", help="Path to FF8 folder", type=str)
+    parser.add_argument("path", help="Path to FF8 folder", type=str, nargs='?', const=1, default=os.getcwd())
     parser.add_argument("-t", "--test", help="For testing purpose", action='store_true')
     parser.add_argument("-kdm", "--keep_download_mod", help="Keep downloading mod file", action='store_true')
 

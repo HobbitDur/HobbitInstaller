@@ -1,1 +1,1 @@
-pyinstaller -F --specpath release --distpath release --workpath release/build main.py
+pyinstaller -n HobbitInstaller -F --specpath release/build --distpath release --workpath release/build --paths .venv/Lib/site-packages main.py
