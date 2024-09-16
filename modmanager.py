@@ -206,7 +206,7 @@ class ModManager():
             shutil.rmtree(self.FOLDER_DOWNLOAD)
 
         if mod_name in self.LIST_MOD_TO_BE_SETUP:
-            if not os.path.isfile("FFNx.toml"):
+            if not os.path.join(self.ff8_path, "FFNx.toml"):
                 with open(os.path.join(self.ff8_path, "FFNx.toml"), "w") as file:
                    pass
             # TODO Check if toml file exist
