@@ -21,6 +21,7 @@ class ModManager():
     MOD_AVAILABLE_FILE = 'mod_available.txt'
     MOD_FILE_NAME = 'mod_file_name.txt'
     LIST_MOD_TO_BE_SETUP = ['FFNxFF8Music', 'FFNx-RoseAndWine']
+    UPDATE_DATA_NAME = "UpdateData"
 
     def __init__(self, ff8_path='.'):
         self.buffer_git_list_mod = []
@@ -70,7 +71,8 @@ class ModManager():
             else:
                 current_mod_tag = current_mod_tag[0]
             self.github_mod_list.append(current_mod)
-            self.mod_dict[current_mod] = {'type': 'github', 'github': self.buffer_git_list_mod[i].split(self.SEP_CHAR)[1], 'tag': current_mod_tag}
+            self.mod_dict[current_mod] = {'type': 'github', 'mod_name':self.buffer_git_list_mod[i].split(self.SEP_CHAR)[0] , 'github': self.buffer_git_list_mod[i].split(self.SEP_CHAR)[1], 'tag': current_mod_tag}
+
 
     def __load_direct_link_info(self):
         # Loading link info for all direct link mod
@@ -99,23 +101,32 @@ class ModManager():
     def save_local_file(self, lang="en"):
         path_to_files = os.path.join(self.ff8_path, 'Data', 'lang-' + lang)
 
+    def __get_github_link(self, mod_name: str):
+        github_link = self.mod_dict[mod_name]['github'] + self.GITHUB_RELEASE_PATH
+        github_link = github_link.replace('github.com', 'api.github.com/repos')
+        return github_link
+    def __get_github_url_file(self, mod_name: str, json_url="assets_url"):
+        json_link = self.__get_github_link(mod_name)
+        json_file = self.download_file(json_link, headers={'content-type': 'application/json'})[0]
+        json_file = json_file.json()
+        dd_url = ""
+        if self.mod_dict[mod_name]['tag'] == 'latest':
+            dd_url = json_file[0][json_url]
+        else:  # Searching the tag
+            for el in json_file:
+                if el['tag_name'] == self.mod_dict[mod_name]['tag']:
+                    dd_url = el[json_url]
+        return dd_url
     def install_mod(self, mod_name: str, keep_download_mod=False, special_status={}, download=True):
         os.makedirs(self.FOLDER_DOWNLOAD, exist_ok=True)
-        if mod_name in self.github_mod_list:
+
+        if mod_name == self.UPDATE_DATA_NAME:
+            dd_url = self.__get_github_url_file(self.UPDATE_DATA_NAME, "zipball_url")
+            dd_file_name = self.download_file(dd_url, write_file=True)[1]
+        elif mod_name in self.github_mod_list:
             if download:
-                json_link = self.mod_dict[mod_name]['github'] + self.GITHUB_RELEASE_PATH
-                json_link = json_link.replace('github.com', 'api.github.com/repos')
-                json_file = self.download_file(json_link, headers={'content-type': 'application/json'})[0]
-                json_file = json_file.json()
-                assets_url = ""
-                if self.mod_dict[mod_name]['tag'] == 'latest':
-                    assets_url = json_file[0]['assets_url']
-                else:  # Searching the tag
-                    for el in json_file:
-                        if el['tag_name'] == self.mod_dict[mod_name]['tag']:
-                            assets_url = el['assets_url']
-                            break
-                json_file = self.download_file(assets_url, headers={'content-type': 'application/json'})[0].json()
+                dd_url = self.__get_github_url_file(mod_name, "assets_url")
+                json_file = self.download_file(dd_url, headers={'content-type': 'application/json'})[0].json()
                 asset_link = ""
                 if mod_name == 'FFNx':
                     for el in json_file:
@@ -129,7 +140,6 @@ class ModManager():
                 dd_file_name = self.download_file(asset_link, write_file=True)[1]
             else:
                 dd_file_name = self.mod_list_file_name[self.mod_file_list.index(mod_name)]
-
         elif mod_name in self.direct_link_mod_list:
             direct_file = self.mod_dict[mod_name]['link']
             if mod_name == "FFNxFF8Music":  # need remove " around
@@ -187,10 +197,12 @@ class ModManager():
         elif 'DefaultFiles' in mod_name:
             futur_path = os.path.join(self.ff8_path, 'Data', 'lang-{}'.format(mod_name[-2:].lower()))
             archive_to_copy = os.path.join(archive, list_dir[index_folder])
+        elif mod_name == self.UPDATE_DATA_NAME:
+            archive_to_copy = os.path.join(archive, list_dir[index_folder])
+            futur_path = os.getcwd()
         elif index_folder >= 0:  # If the extract contain the folder name itself
             archive_to_copy = os.path.join(archive, list_dir[index_folder])
             futur_path = self.ff8_path
-
         else:
             archive_to_copy = archive
             futur_path = self.ff8_path
@@ -213,3 +225,7 @@ class ModManager():
                 self.ffnx_manager.change_rosewine_music_option()
 
             self.ffnx_manager.write_ffnx_setup_file(self.ff8_path)
+
+
+    def update_data(self):
+        self.install_mod(self.UPDATE_DATA_NAME)

@@ -11,6 +11,7 @@ from modmanager import ModManager
 class Installer(QObject):
     progress = pyqtSignal(int)
     completed = pyqtSignal(int)
+    update_data_completed = pyqtSignal()
 
     @pyqtSlot(ModManager, list, bool, dict, bool)
     def install(self, mod_manager, mod_to_be_installed, keep_downloaded_mod, special_status={}, download=True):
@@ -18,15 +19,19 @@ class Installer(QObject):
             mod_manager.install_mod(mod_name, keep_downloaded_mod, special_status, download)
             self.progress.emit(index + 1)
         self.completed.emit(len(mod_to_be_installed))
-
+    @pyqtSlot(ModManager)
+    def update_data(self, mod_manager):
+        mod_manager.update_data()
+        self.update_data_completed.emit()
 
 class WindowInstaller(QWidget):
     install_requested = pyqtSignal(ModManager, list, bool, dict, bool)
+    update_data_requested = pyqtSignal(ModManager)
     FF8_RELOAD_NAME = "FFVIII-Reloaded-FR-ONLY"
     RAGNAROK_NAME = "Ragnarok-EN-ONLY"
     LIST_SPECIAL_MOD = [FF8_RELOAD_NAME, RAGNAROK_NAME]
     MOD_CHECK_DEFAULT = ['FFNx', 'FFNxFF8Music']
-    def __init__(self, mod_manager, icon_path='ModSetup'):
+    def __init__(self, mod_manager, icon_path='Resources'):
 
         QWidget.__init__(self)
         # Managing thread
@@ -34,7 +39,9 @@ class WindowInstaller(QWidget):
         self.installer_thread = QThread()
         self.installer.progress.connect(self.install_progress)
         self.installer.completed.connect(self.install_completed)
+        self.installer.update_data_completed.connect(self.update_data_completed)
         self.install_requested.connect(self.installer.install)
+        self.update_data_requested.connect(self.installer.update_data)
         self.installer.moveToThread(self.installer_thread)
         self.installer_thread.start()
 
@@ -82,6 +89,14 @@ class WindowInstaller(QWidget):
         self.install_over.setWindowTitle("Installing over!")
         self.install_over.setText("Installing over!")
         self.install_over.hide()
+
+        # Button Update link data
+        self.update_data_button = QPushButton(parent=self, text="Updating data")
+        self.update_data_button.clicked.connect(self.update_data_click)
+        self.update_data_over = QMessageBox(parent=self)
+        self.update_data_over.setWindowTitle("Updating data over!")
+        self.update_data_over.setText("Updating data over!")
+        self.update_data_over.hide()
 
         # FFVIII Reloaded
 
@@ -181,6 +196,7 @@ class WindowInstaller(QWidget):
 
         self.layout_main.addLayout(self.layout_setup)
         self.layout_main.addLayout(self.layout_mod)
+        self.layout_main.addWidget(self.update_data_button)
         self.layout_main.addWidget(self.install_button)
         self.layout_main.addWidget(self.progress)
 
@@ -208,17 +224,28 @@ class WindowInstaller(QWidget):
                     special_status[self.RAGNAROK_NAME] = self.ragnarok_lionheart.text()
             if self.mod_checkbox[mod_name].checkState() == Qt.CheckState.Checked:
                 mod_to_be_installed.append(mod_name)
-        self.progress.setRange(0, len(mod_to_be_installed))
-        self.progress.setValue(0)
+        self.progress.setRange(0, len(mod_to_be_installed)+1)
+        self.progress.setValue(1)
         download = self.download.isChecked()
 
         self.install_requested.emit(self.mod_manager, mod_to_be_installed, self.keep_mod_archive.isChecked(), special_status, download)
 
+    def update_data_click(self):
+        self.progress.show()
+        self.progress.setRange(0, 2)
+        self.progress.setValue(1)
+        self.update_data_requested.emit(self.mod_manager)
+
     def install_progress(self, nb_install_done):
-        self.progress.setValue(nb_install_done)
+        self.progress.setValue(nb_install_done+1)
 
     def install_completed(self, nb_install_done):
-        self.progress.setValue(nb_install_done)
+        self.progress.setValue(nb_install_done+1)
         self.progress.hide()
         self.install_over.show()
+        self.resize(self.minimumSizeHint())
+    def update_data_completed(self):
+        self.progress.setValue(1)
+        self.progress.hide()
+        self.update_data_over.show()
         self.resize(self.minimumSizeHint())
