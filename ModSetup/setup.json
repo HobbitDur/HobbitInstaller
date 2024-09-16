@@ -10,6 +10,7 @@
       "modder_name": "Hobbitdur",
       "mod_info": "HobbitInstaller",
       "mod_type": "Setup",
+      "default_selected": "false",
       "ffnx_param": {},
       "lang": [
         "en",
@@ -29,6 +30,7 @@
       "modder_name": "Hobbitdur",
       "mod_info": "To reset gameplay mod",
       "mod_type": "Gameplay",
+      "default_selected": "false",
       "ffnx_param": {},
       "lang": [
         "fr"
@@ -46,6 +48,7 @@
       "modder_name": "Hobbitdur",
       "mod_info": "To reset gameplay mod",
       "mod_type": "Gameplay",
+      "default_selected": "false",
       "ffnx_param": {},
       "lang": [
         "en"
@@ -63,6 +66,7 @@
       "modder_name": "Hobbitdur",
       "mod_info": "To reset gameplay mod",
       "mod_type": "Gameplay",
+      "default_selected": "false",
       "ffnx_param": {},
       "lang": [
         "de"
@@ -80,6 +84,7 @@
       "modder_name": "TrueOdin, myst6re, Cosmos, vertex2995",
       "mod_info": "Low level tools to interface with the game",
       "mod_type": "Wrapper",
+      "default_selected": "true",
       "ffnx_param": {},
       "lang": [
         "en",
@@ -99,6 +104,7 @@
       "modder_name": "TrueOdin",
       "mod_info": "To avoid having many click on launcher, just directly launch the game",
       "mod_type": "EaseOfLife",
+      "default_selected": "true",
       "ffnx_param": {},
       "lang": [
         "en",
@@ -118,6 +124,7 @@
       "modder_name": "myst6re",
       "mod_info": "Better music",
       "mod_type": "Music",
+      "default_selected": "false",
       "ffnx_param": {
         "use_external_music": "true",
         "external_music_path": "\"psf\"",
@@ -142,6 +149,7 @@
       "modder_name": "None",
       "mod_info": "None",
       "mod_type": "Music",
+      "default_selected": "false",
       "ffnx_param": {
         "use_external_music": "true",
         "external_music_path": "\"music\"",
@@ -166,6 +174,7 @@
       "modder_name": "MikeDoesAudio",
       "mod_info": "Original SoundTrack ReFined by a professional mixer",
       "mod_type": "Music",
+      "default_selected": "true",
       "ffnx_param": {
         "use_external_music": "true",
         "external_music_path": "\"music\"",
@@ -184,6 +193,7 @@
       "link": "https://nas-ludo.fr/drive/d/s/ydCVP829Bye9WUz2ncI4dQInltWN6IFz/webapi/entry.cgi/SYNO.SynologyDrive.Files/FFNxBattlefields.rar?api=SYNO.SynologyDrive.Files&method=download&version=2&files=%5B%22id%3A820784500098245147%22%5D&force_download=true&json_error=true&download_type=%22download%22&c2_offload=%22allow%22&_dc=1724337524125&sharing_token=%22tDH.P.phuQzM7_to9OQonrewdb5GPyQ2fZaTG8k5dLGc8S9.LMCVycV_o75iixvU74WQMzGC50YDBZ8J3pohCAJVxboUT4npnzFhUYcS67_sgyGM.c0K5MZSef1fXYvJb6FbUt08_nPNRFx2PDWCYDuix8wH4CArMWwcqGsrS1tAowjxXLu8wabyppWmQ7ZohhDke2e5OPHWDA5EE05rDtinoWWgBtazho96LRDjrNslLN_S2FrweiS4%22&SynoToken=bXXAHAd1hrf7w",
       "git_tag": "none",
       "mod_type": "Graphical",
+      "default_selected": "false",
       "rank": "80",
       "compatibility": [
         "ffnx"
@@ -209,6 +219,7 @@
       "modder_name": "MCINDUS & Digixu",
       "mod_info": "Improve monster quality",
       "mod_type": "Graphical",
+      "default_selected": "false",
       "ffnx_param": {},
       "lang": [
         "en",
@@ -228,6 +239,7 @@
       "modder_name": "MCINDUS & Digixu",
       "mod_info": "Improve triple triad",
       "mod_type": "Graphical",
+      "default_selected": "false",
       "ffnx_param": {},
       "lang": [
         "en",
@@ -247,6 +259,7 @@
       "modder_name": "callisto",
       "mod_info": "Hard mod",
       "mod_type": "Gameplay",
+      "default_selected": "false",
       "ffnx_param": {},
       "lang": [
         "en"
@@ -264,6 +277,7 @@
       "modder_name": "Hobbitdur",
       "mod_info": "Hard mod that balance the game. WIP do not install if not a tester",
       "mod_type": "Gameplay",
+      "default_selected": "false",
       "ffnx_param": {},
       "lang": [
         "fr"
@@ -281,6 +295,7 @@
       "modder_name": "Antoine211 ",
       "mod_info": "Mod that keep all that is in the game but change everything to rediscover the game !",
       "mod_type": "Gameplay",
+      "default_selected": "false",
       "ffnx_param": {},
       "lang": [
         "fr"
@@ -298,6 +313,7 @@
       "modder_name": "mexico ",
       "mod_info": "Hard mod",
       "mod_type": "Gameplay",
+      "default_selected": "false",
       "ffnx_param": {},
       "lang": [
         "fr"
