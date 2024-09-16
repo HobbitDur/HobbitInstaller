@@ -20,6 +20,12 @@ class FFNxManager():
             for line in self.ffnx_setup:
                 file.write(line + '\n')
 
+    def change_ffnx_option(self, ffnx_param):
+        for i, line in enumerate(self.ffnx_setup):
+            for param, value in ffnx_param:
+                if param in line and '=' in line:
+                    line_split = line.split('=')
+                    self.ffnx_setup[i] = line_split[0] + "=" + value + "#Value changed by HobbitInstaller"
     def change_ffnx_music_option(self):
 
         self.__change_music_option(self.MUSIC_FFNX_PARAM_CHANGE.items())

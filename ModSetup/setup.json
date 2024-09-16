@@ -1,0 +1,291 @@
+{
+  "AvailableMods": {
+    "UpdateData": {
+      "download_type": "github",
+      "download_name": "none",
+      "link": "https://github.com/HobbitDur/HobbitInstaller-data",
+      "git_tag": "latest",
+      "rank": "0",
+      "compatibility": "False",
+      "modder_name": "Hobbitdur",
+      "mod_info": "HobbitInstaller",
+      "ffnx_param": {},
+      "lang": [
+        "en",
+        "fr",
+        "de"
+      ]
+    },
+    "DefaultFilesFR": {
+      "download_type": "direct",
+      "download_name": "DefaultFilesFR.zip",
+      "link": "https://nas-ludo.fr/drive/d/s/ynCDplrefeIZPEnR51gLYpEE4ViK8wfu/webapi/entry.cgi/SYNO.SynologyDrive.Files/DefaultFilesFR.zip?api=SYNO.SynologyDrive.Files&method=download&version=2&files=%5B%22id%3A822966903157860063%22%5D&force_download=true&json_error=true&download_type=%22download%22&c2_offload=%22allow%22&_dc=1720980301836&sharing_token=%22VddnQ1UOML7RecJYk0gh4taUOezTxkGdc798RINi0MCi_WftM6k8FDYC0Z7GeAFYYH3REWlTRddMGg07.ijUiYWbkFKDCskNp1jwF9_68MbfKxSDtZOhkkco3hNzr5avrf1gkmZlr6LPvikKJWDG7waFz86e789VWCiBKymkLCIE1bsihK.cf21v0T73SaeqNDMqqqaGK.DTUAfPpzfooib_OR5m6O2letYVYIwZfKIUDT5w7cXmRzhN%22",
+      "git_tag": "none",
+      "rank": "1",
+      "compatibility": [
+        "ffnx"
+      ],
+      "modder_name": "Hobbitdur",
+      "mod_info": "None",
+      "ffnx_param": {},
+      "lang": [
+        "fr"
+      ]
+    },
+    "DefaultFilesEN": {
+      "download_type": "direct",
+      "download_name": "DefaultFilesEN.zip",
+      "link": "https://nas-ludo.fr/drive/d/s/ynTHPzfDyYO7wnoi8fDsnnQJI0cOXwiu/webapi/entry.cgi/SYNO.SynologyDrive.Files/DefaultFilesEN.zip?api=SYNO.SynologyDrive.Files&method=download&version=2&files=%5B%22id%3A823026974191560455%22%5D&force_download=true&json_error=true&download_type=%22download%22&c2_offload=%22allow%22&_dc=1720980246416&sharing_token=%22Dx8354qXT.KTcym1an.iVlLlq3b0XE.21.CQb97QvC_Aoe4LgJBLnX.V1ZH.7jvfTmL7V0Y1fMPY9nLNNB.kg9wrvvnjLEsYWrI2rGKPwVhdHJqE9fKz7P1xr6CrX1AsJQ8S.lyvR6_Vvy4NcBZFHVtA5MST8pS81YAcjld6X5bImcfYt2dKiBq43Qq5Ttkx0xQVnGt8JN8FDGx_8yZQVsibO8GJiZZZJSZJ_N.tICOAiPjN9PD895Bx%22",
+      "git_tag": "none",
+      "rank": "10",
+      "compatibility": [
+        "ffnx"
+      ],
+      "modder_name": "Hobbitdur",
+      "mod_info": "None",
+      "ffnx_param": {},
+      "lang": [
+        "en"
+      ]
+    },
+    "DefaultFilesDE": {
+      "download_type": "direct",
+      "download_name": "DefaultFilesDE.zip",
+      "link": "https://nas-ludo.fr/drive/d/s/ynTJrtTP6kxshUHGLmx57py2KhnPyOxu/webapi/entry.cgi/SYNO.SynologyDrive.Files/DefaultFilesDE.zip?api=SYNO.SynologyDrive.Files&method=download&version=2&files=%5B%22id%3A823027113352275759%22%5D&force_download=true&json_error=true&download_type=%22download%22&c2_offload=%22allow%22&_dc=1720980136157&sharing_token=%22vDM0pkFYhX9naaL.rI1BisTRZD90SDTO51bDBhyyWvXBY7JwYmxgc3VSjFk6lXOVM8HWZmud1PdIq9P02dfIaikwFSeT6wkw.DBcjGScoIc3gj2TUZPhEZF1mDUwIRTZyPAGXSbJuSZgseT5DA2z0q8Dp0cS_q02ErdnnF5YW32Gd5qybn1wLeOh1OL2O_oj0A6eJCGKkd2Jt36BlyNLinWEO45D_JTAYaB9JPRIq3lIb4N26lVbfS3F%22",
+      "git_tag": "none",
+      "rank": "20",
+      "compatibility": [
+        "ffnx"
+      ],
+      "modder_name": "Hobbitdur",
+      "mod_info": "None",
+      "ffnx_param": {},
+      "lang": [
+        "de"
+      ]
+    },
+    "FFNx": {
+      "download_type": "github",
+      "download_name": "none",
+      "link": "https://github.com/julianxhokaxhiu/FFNx",
+      "git_tag": "latest",
+      "rank": "30",
+      "compatibility": [
+        "ffnx"
+      ],
+      "modder_name": "TrueOdin, myst6re, Cosmos, vertex2995",
+      "mod_info": "Low level tools to interface with the game",
+      "ffnx_param": {
+        "use_external_music": "true",
+        "external_music_path": "\"psf\"",
+        "external_music_ext": "\"minipsf\"",
+        "he_bios_path": "\"psf/hebios.bin\""
+      },
+      "lang": [
+        "en",
+        "fr",
+        "de"
+      ]
+    },
+    "FF78Launcher": {
+      "download_type": "github",
+      "download_name": "none",
+      "link": "https://github.com/julianxhokaxhiu/FF78Launcher",
+      "git_tag": "latest",
+      "rank": "40",
+      "compatibility": [
+        "ffnx"
+      ],
+      "modder_name": "TrueOdin",
+      "mod_info": "To avoid having many click on launcher, just directly launch the game",
+      "ffnx_param": {},
+      "lang": [
+        "en",
+        "fr",
+        "de"
+      ]
+    },
+    "FFNxFF8Music": {
+      "download_type": "direct",
+      "download_name": "FFNx-FF8Music-v1.5.zip",
+      "link": "https://www.ff8.fr/download/programs/FFNx-FF8Music-v1.5.zip",
+      "git_tag": "none",
+      "rank": "50",
+      "compatibility": [
+        "ffnx"
+      ],
+      "modder_name": "myst6re",
+      "mod_info": "Better music",
+      "ffnx_param": {},
+      "lang": [
+        "en",
+        "fr",
+        "de"
+      ]
+    },
+    "FFNx-RoseAndWine": {
+      "download_type": "direct",
+      "download_name": "FFNx-RoseAndWine.zip",
+      "link": "https://nas-ludo.fr/drive/d/s/ykEctZwuaU8n9jXTUwXdt59MxMVTyXxv/webapi/entry.cgi/SYNO.SynologyDrive.Files/FFNx-RoseAndWin.zip?api=SYNO.SynologyDrive.Files&method=download&version=2&files=%5B%22id%3A822320349564675511%22%5D&force_download=true&json_error=true&download_type=%22download%22&c2_offload=%22allow%22&_dc=1724099160016&sharing_token=%22qQNFKl.PwbW1lMBrGO9FQ_s4hOJJWyZ1o_QaSyKbdwHvRjNda2uUnp56lp00WmUr8NreOKs9XH2f4590gBPhFrkV4qCPjTnVsh2k4mA97FkEsXU3nRqhvhTDxutclQ7FeWk1ATvdogN97dIUsMENvAhFmUg7WBXT.s0v36VbsLanOe2bQAxYkkWvHcwfIRP.5EhqNcrfsoIDN.dPrBGkWifomcuRSyMDPve3pP.uF2QXl1jtmkMys6li%22&SynoToken=y6IlmhppUkOLg",
+      "git_tag": "none",
+      "rank": "60",
+      "compatibility": [
+        "ffnx"
+      ],
+      "modder_name": "None",
+      "mod_info": "None",
+      "ffnx_param": {
+        "use_external_music": "true",
+        "external_music_path": "\"music\"",
+        "external_music_ext": "\"ogg\"",
+        "he_bios_path": "\"psf/hebios.bin\""
+      },
+      "lang": [
+        "en",
+        "fr",
+        "de"
+      ]
+    },
+    "Tsunamods-OST-RF": {
+      "download_type": "direct",
+      "download_name": "OST-RF v1.0 FFNx.zip",
+      "link": "https://download.tsunamods.com/?id=12",
+      "git_tag": "none",
+      "rank": "70",
+      "compatibility": [
+        "ffnx"
+      ],
+      "modder_name": "MikeDoesAudio",
+      "mod_info": "None",
+      "ffnx_param": {
+        "use_external_music": "true",
+        "external_music_path": "\"music\"",
+        "external_music_volume": "\"75\"",
+        "external_music_sync": "\"true\""
+      },
+      "lang": [
+        "en",
+        "fr",
+        "de"
+      ]
+    },
+    "FFNxBattlefields": {
+      "download_type": "direct",
+      "download_name": "FFNxBattlefields.rar",
+      "link": "https://nas-ludo.fr/drive/d/s/ydCVP829Bye9WUz2ncI4dQInltWN6IFz/webapi/entry.cgi/SYNO.SynologyDrive.Files/FFNxBattlefields.rar?api=SYNO.SynologyDrive.Files&method=download&version=2&files=%5B%22id%3A820784500098245147%22%5D&force_download=true&json_error=true&download_type=%22download%22&c2_offload=%22allow%22&_dc=1720980408232&sharing_token=%22F5SH6fdLXOTMvFhpXC5nf0VM.ZkEOO2syLoYT4Ji5a0D8rnZRkZ_a_h04eZsqgfdPH3RojpSq37..Eag6Z1VxTMEJXyFgqRbBd7q7CrFEJdrU6GpoDdjU2Uq1epXQNGXeCbNzrDyNORRgsLWEdsk8LWMogqyTSKM44cFQzRe8M38W18oW9bbfKz0YHaZGDHyolGPPC.1mwlpEuB0vjHKoo1LSdr2Iysav293d6JaLDkrdTaXMg2CPDbf%22",
+      "git_tag": "none",
+      "rank": "80",
+      "compatibility": [
+        "ffnx"
+      ],
+      "modder_name": "MCINDUS & Digixu",
+      "mod_info": "Improve battle field quality",
+      "ffnx_param": {},
+      "lang": [
+        "en",
+        "fr",
+        "de"
+      ]
+    },
+    "FFNxLunarCry": {
+      "download_type": "direct",
+      "download_name": "FFNxLunarCry.rar",
+      "link": "https://nas-ludo.fr/drive/d/s/ydCVctrYS4sQrbHgWW8KkjgYH6AF20lt/webapi/entry.cgi/SYNO.SynologyDrive.Files/FFNxLunarCry.rar?api=SYNO.SynologyDrive.Files&method=download&version=2&files=%5B%22id%3A820784512714711581%22%5D&force_download=true&json_error=true&download_type=%22download%22&c2_offload=%22allow%22&_dc=1720980492969&sharing_token=%228AhN_AvKhQ1tZaJBZ0ttsEREa7.zpTUji0WZuNWEi0GAjeZy90hLHnadWc1v9jh.HGPl1xe6u9Ia.RICXgO062sLYaSeBIkJ7Yem.ioTEYeyRJe4VXm22n2RS.8dyMGARlZzvfBjAKIEghAL1QbTbiSDJIT65E4zXTQ4Ynj4MYmt8hVa1CHy2xNE_DeZ5yb6F3p4LRTxN03ZEpMbZHIy1t9_KzWoZLBpQrUBmK9ikH7j8VCEpKD0C01Q%22",
+      "git_tag": "none",
+      "rank": "90",
+      "compatibility": [
+        "ffnx"
+      ],
+      "modder_name": "MCINDUS & Digixu",
+      "mod_info": "Improve monster quality",
+      "ffnx_param": {},
+      "lang": [
+        "en",
+        "fr",
+        "de"
+      ]
+    },
+    "FFNxTripod": {
+      "download_type": "direct",
+      "download_name": "FFNxTripod.rar",
+      "link": "https://nas-ludo.fr/drive/d/s/ydCVs3qDgknTbq1rWpMqdZ6lRXZ0QRYO/webapi/entry.cgi/SYNO.SynologyDrive.Files/FFNxTripod.rar?api=SYNO.SynologyDrive.Files&method=download&version=2&files=%5B%22id%3A820784526604149279%22%5D&force_download=true&json_error=true&download_type=%22download%22&c2_offload=%22allow%22&_dc=1720980604424&sharing_token=%22PoRqnQcnCa7TC8v6mS1fWCWLRMbFf_i56CJb6X70nDMj_1ul_bry0Epr0PXEEeRan1apvdpe54F1j0BP.aGaP774nyeyz_OYo8QXyngpMUOCV7RZZx_4oTYvfya9HjsDwnFYuE3LoLOSbLxQFN7NR1SSbPGoK1FbdooksGXZ9G1BoPQCWaVOmOV99xg6bYTxOXIiOpvjRK0o.Mu9p8jP.7MVMrDimmlEByqrKLlqk9JOCVOK0_PMbu3R%22",
+      "git_tag": "none",
+      "rank": "100",
+      "compatibility": [
+        "ffnx"
+      ],
+      "modder_name": "MCINDUS & Digixu",
+      "mod_info": "Improve triple triad",
+      "ffnx_param": {},
+      "lang": [
+        "en",
+        "fr",
+        "de"
+      ]
+    },
+    "Ragnarok-EN-ONLY": {
+      "download_type": "direct",
+      "download_name": "Ragnarok Mod v1.2.3 for Steam 2013 (06-05-2023).rar",
+      "link": "https://nas-ludo.fr/drive/d/s/ynnsiGvOtoCqPBHvt6zFX0lo9LIKaMv2/webapi/entry.cgi/SYNO.SynologyDrive.Files/Ragnarok%20Mod%20v1.2.3%20for%20Steam%202013%20(06-05-2023).rar?api=SYNO.SynologyDrive.Files&method=download&version=2&files=%5B%22id%3A823099524837845149%22%5D&force_download=true&json_error=true&download_type=%22download%22&c2_offload=%22allow%22&_dc=1720980695002&sharing_token=%22SdlzQiW8XgISIgpv9ukL4qgHDqdJnriNMMhyQ5mZCgGOffNnGAYEgVQ_TyRlkXVwk7mqQn8vNb7boZV46Z8a6If1o04IpsVmFtWvZxkFHsEbUq5lhmhBGWBoOY4JU8i1a7uYv5Sff1yvhxvtQrElcvyCThxVrprqdLE.6oMNcWysD3yVS5GuJBhfVJtUXKoKerp8MsELZ8lFdEP.ovO8j4fd8cQX.k8QxIwaAFwtI7p5ZnQ2jx3InMK4%22",
+      "git_tag": "none",
+      "rank": "110",
+      "compatibility": [
+        "ffnx"
+      ],
+      "modder_name": "None",
+      "mod_info": "None",
+      "ffnx_param": {},
+      "lang": [
+        "en"
+      ]
+    },
+    "HobbitGameplayMod-ALPHA-FR-ONLY": {
+      "download_type": "direct",
+      "download_name": "HobbitGameplayMod.zip",
+      "link": "https://nas-ludo.fr/drive/d/s/ycCFcEyDr8CMdLmrDcbKi1D0ft5PyQ3g/webapi/entry.cgi/SYNO.SynologyDrive.Files/HobbitMod-0.0.1.zip?api=SYNO.SynologyDrive.Files&method=download&version=2&files=%5B%22id%3A820565263201116691%22%5D&force_download=true&json_error=true&download_type=%22download%22&c2_offload=%22allow%22&_dc=1720980651628&sharing_token=%22X2FteW6Q0HC61FJXHijkVmADLavWBYjIp2Qh25t2Y_L9pMaDXMd8It3uF5Uto0Hf6q1UQojGCSJQzxZ6qpswrhTWeUhxZiJGAumWni2_Z9NPSpsbjsz2YH3s640seN7iePmzWO9JR2JwPRcaPZcrKOqzVbp2ZPzK_o9u22y6gWpZLVyVYvjfc8ubKDpEqpcJdLLtoFICG2ms17L2VutUMwAnmocs.LNXvS2j3FZy7su05zyirUSpjPo1%22",
+      "git_tag": "none",
+      "rank": "120",
+      "compatibility": [
+        "ffnx"
+      ],
+      "modder_name": "Hobbitdur",
+      "mod_info": "Hard mod that balance the game",
+      "ffnx_param": {},
+      "lang": [
+        "fr"
+      ]
+    },
+    "FF8Curiosite-FR-ONLY": {
+      "download_type": "direct",
+      "download_name": "FF8Curiosite.zip",
+      "link": "https://nas-ludo.fr/drive/d/s/ynUFKFt12wmDvkNcuo74A09C1zyFKJ6h/webapi/entry.cgi/SYNO.SynologyDrive.Files/FF8Curiosite.zip?api=SYNO.SynologyDrive.Files&method=download&version=2&files=%5B%22id%3A823030376948606771%22%5D&force_download=true&json_error=true&download_type=%22download%22&c2_offload=%22allow%22&_dc=1720980344546&sharing_token=%22CT80CwKdRM0NRwnxEPqcvO659z8CzRBzuoa6mpi126BOKijaLfDzKiygx583e2Rofx7Fsn3Qu7tgzZ422qKE3FrFx2_LN_oBmCrnWAYFSYIIQpOC_qkF_XsL7PG8JbkfOCNZ3RmKWk80plhDGWrGPQhNQP.LAzr.PGMc_EnZtd.M2PUjQNnJsTgV_K_Si1777k6nzHVc_BpbLZ8MgFIu1K5Yndn9oByuA3betCH9scNGXGjJL4SNjvry%22",
+      "git_tag": "none",
+      "rank": "130",
+      "compatibility": [
+        "ffnx"
+      ],
+      "modder_name": "None",
+      "mod_info": "None",
+      "ffnx_param": {},
+      "lang": [
+        "fr"
+      ]
+    },
+    "FFVIII-Reloaded-FR-ONLY": {
+      "download_type": "direct",
+      "download_name": "FFVIII Reloaded v.2.12.7z",
+      "link": "https://drive.usercontent.google.com/download?id=1MX_ozCHfh_E5SoPTrXcvOjXS_xBWz4gX&export=download&authuser=0&confirm=t&uuid=e3fbfbc1-47f8-4438-b52a-6e5092492327&at=APZUnTVk0Lh23ZYITN7jiciZFsYx%3A1717709908524",
+      "git_tag": "none",
+      "rank": "140",
+      "compatibility": [
+        "ffnx"
+      ],
+      "modder_name": "None",
+      "mod_info": "None",
+      "ffnx_param": {},
+      "lang": [
+        "fr"
+      ]
+    }
+  }
+}
