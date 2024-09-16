@@ -1,3 +1,6 @@
+DefaultFilesFR.zip
+DefaultFilesEN.zip
+DefaultFilesDE.zip
 FFNx-Steam-v1.19.1.0.zip
 FFNx-FF8Music-v1.5.zip
 FFNx-RoseAndWine.rar
@@ -6,4 +9,5 @@ FFNxBattlefields.rar
 FFNxLunarCry.rar
 FFNxTripod.rar
 HobbitGameplayMod.zip
+FF8Curiosite.zip
 FFVIII Reloaded v.2.12.7z

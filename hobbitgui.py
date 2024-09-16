@@ -22,11 +22,9 @@ class Installer(QObject):
 
 class WindowInstaller(QWidget):
     install_requested = pyqtSignal(ModManager, list, bool, dict, bool)
-    MOD_CHECK_DEFAULT = ['FFNxFF8Music']
     FF8_RELOAD_NAME = "FFVIII-Reloaded-FR-ONLY"
-
-    # MOD_CHECK_DEFAULT = ['FFNx', 'FFNxFF8Music']
-    def __init__(self, mod_manager, keep_downloaded_mod=False, icon_path='ModSetup'):
+    MOD_CHECK_DEFAULT = ['FFNx', 'FFNxFF8Music']
+    def __init__(self, mod_manager, icon_path='ModSetup'):
 
         QWidget.__init__(self)
         # Managing thread
@@ -40,7 +38,6 @@ class WindowInstaller(QWidget):
 
         # General data
         self.mod_checkbox = {}
-        self.keep_downloaded_mod = keep_downloaded_mod
         self.mod_manager = mod_manager
 
         # Main window
@@ -53,6 +50,8 @@ class WindowInstaller(QWidget):
         # Checkbox
         self.download = QCheckBox(parent=self, text="Download from internet")
         self.download.setChecked(True)
+        self.keep_mod_archive = QCheckBox(parent=self, text="Keep mod_archive")
+        self.keep_mod_archive.setChecked(False)
 
         self.separator = QFrame(self)
         self.separator.setFrameStyle(0x04)  # Can't find QFrame.HLine so here we are
@@ -127,6 +126,7 @@ class WindowInstaller(QWidget):
         self.layout_setup.addWidget(self.label_setup)
 
         self.layout_setup.addWidget(self.download)
+        self.layout_setup.addWidget(self.keep_mod_archive)
         self.layout_setup.addWidget(self.separator)
 
         self.layout_mod.addWidget(self.label_mod)
@@ -163,7 +163,7 @@ class WindowInstaller(QWidget):
         self.progress.setValue(0)
         download = self.download.isChecked()
 
-        self.install_requested.emit(self.mod_manager, mod_to_be_installed, self.keep_downloaded_mod, special_status, download)
+        self.install_requested.emit(self.mod_manager, mod_to_be_installed, self.keep_mod_archive.isChecked(), special_status, download)
 
     def install_progress(self, nb_install_done):
         self.progress.setValue(nb_install_done)

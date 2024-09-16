@@ -178,13 +178,25 @@ class ModManager():
                 archive_to_copy = os.path.join(archive, "FFVIII Reloaded level 100")
             else:
                 archive_to_copy = archive #Shouldn't happen
-            self.ff8_path = os.path.join(self.ff8_path, 'Data', 'lang-fr')
-
+            futur_path = os.path.join(self.ff8_path, 'Data', 'lang-fr')
+        elif mod_name == "FF8Curiosite-FR-ONLY":
+            archive_to_copy = archive  # Shouldn't happen
+            futur_path = os.path.join(self.ff8_path, 'Data', 'lang-fr')
+            os.makedirs(os.path.join(self.ff8_path, 'Data', 'Music', 'dmusic'), exist_ok=True)
+            shutil.copy(os.path.join(archive, "064s-choco.sgt"), os.path.join(self.ff8_path, 'Data', 'Music', 'dmusic'))
+            os.remove(os.path.join(archive, "064s-choco.sgt"))
+        elif 'DefaultFiles' in mod_name:
+            futur_path = os.path.join(self.ff8_path, 'Data', 'lang-{}'.format(mod_name[-2:].lower()))
+            archive_to_copy = os.path.join(archive, list_dir[index_folder])
         elif index_folder >= 0:# If the extract contain the folder name itself
             archive_to_copy = os.path.join(archive, list_dir[index_folder])
+            futur_path = self.ff8_path
         else:
             archive_to_copy = archive
-        shutil.copytree(archive_to_copy, self.ff8_path, dirs_exist_ok=True)
+            futur_path = self.ff8_path
+
+
+        shutil.copytree(archive_to_copy, futur_path, dirs_exist_ok=True)
 
 
         if archive != "":

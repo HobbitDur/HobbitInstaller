@@ -28,5 +28,5 @@ if __name__ == '__main__':
     if not app:  # sinon on crée une instance de QApplication
         app = QApplication(sys.argv)
 
-    window_installer = WindowInstaller(mod_manager, keep_downloaded_mod=args.keep_download_mod)
+    window_installer = WindowInstaller(mod_manager)
     sys.exit(app.exec())
