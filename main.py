@@ -1,10 +1,10 @@
 import argparse
-import glob
-import json
 import os
 import re
 import shutil
 from zipfile import ZipFile
+
+import patoolib
 import requests
 
 GITHUB_RELEASE_TAG_PATH = "/releases/tag/"
@@ -32,17 +32,19 @@ def download_file(link, headers={}, write_file=False, file_name=None, dest_path=
     request_return = requests.get(link, headers=headers)
     if not file_name:
         if "Content-Disposition" in request_return.headers.keys():
-            file_name = re.findall("filename=(.+)", request_return.headers["Content-Disposition"])[0]
+            file_name = re.findall("filename\*?=['\"]?(?:UTF-\d['\"]*)?([^;\r\n\"']*)['\"]?;?", request_return.headers["Content-Disposition"])[0]
         else:
             file_name = link.split("/")[-1]
     if request_return.status_code == 200:
         print("Successfully downloaded {}".format(link))
         if write_file:
+            print(file_name)
+            print(os.path.join(dest_path, file_name))
             with open(os.path.join(dest_path, file_name), "wb") as file:
                 file.write(request_return.content)
     else:
         print("Fail to download {}".format(link))
-    return request_return
+    return request_return, file_name
 
 
 def remove_test_file():
@@ -120,10 +122,9 @@ if __name__ == '__main__':
     for mod_name in mod_file_list:
         print("Downloading {}".format(mod_name))
         if mod_name in github_mod_list:
-            dd_file_name = "FFNx-Steam-v1.19.1.0.zip"
             json_link = mod_list[mod_name]['github'] + GITHUB_RELEASE_PATH
             json_link = json_link.replace('github.com', 'api.github.com/repos')
-            json_file = download_file(json_link, headers={'content-type': 'application/json'})
+            json_file = download_file(json_link, headers={'content-type': 'application/json'})[0]
             json_file = json_file.json()
             assets_url = ""
             if mod_list[mod_name]['tag'] == 'latest':
@@ -133,8 +134,7 @@ if __name__ == '__main__':
                     if el['tag_name'] == mod_list[mod_name]['tag']:
                         assets_url = el['assets_url']
                         break
-            json_file = download_file(assets_url, headers={'content-type': 'application/json'})
-            json_file = json_file.json()
+            json_file = download_file(assets_url, headers={'content-type': 'application/json'})[0].json()
             asset_link = ""
             if mod_name == 'FFNx':
                 for el in json_file:
@@ -144,49 +144,60 @@ if __name__ == '__main__':
             elif len(json_file) == 1:
                 asset_link = json_file[0]['browser_download_url']
             else:
-                print("Didn't manage several asset without a particuliar case")
+                print("Didn't manage several asset without a particular case")
 
-            dd_file_name = asset_link.split('/')[-1]
-
-            download_file(asset_link, write_file=True)
+            dd_file_name = download_file(asset_link, write_file=True)[1]
         elif mod_name in direct_link_mod_list:
-
             direct_file = mod_list[mod_name]['link']
             if mod_name == "HobbitGameplayMod":  # Special because the link as a content-type of html instead of octetstream
                 dd_file_name = "HobbitGameplayMod.zip"
-                download_file(direct_file, write_file=True, file_name=dd_file_name)
+            elif mod_name == "FFNxBattlefield":
+                dd_file_name = "FFNxBattlefields.rar"
+            elif mod_name == "FFNxLunarCry":
+                dd_file_name = "FFNxLunarCry.rar"
+            elif mod_name == "FFNxSeedReborn":
+                dd_file_name = "FFNxSeedReborn.rar"
+            elif mod_name == "FFNxTripod":
+                dd_file_name = "FFNxTripod.rar"
             elif mod_name == "FFNxFF8Music":  # need remove " around
                 dd_file_name = direct_file.split('/')[-1]
-                download_file(direct_file, write_file=True, file_name=dd_file_name)
                 change_music_option(ffnx_setup)
             else:
-                dd_file_name = direct_file.split('/')[-1]
-                download_file(direct_file, write_file=True)
+                dd_file_name = None
+            dd_file_name = download_file(direct_file, write_file=True, file_name=dd_file_name)[1]
         else:
             raise ValueError("Unexpected ELSE")
-
-
+        archive = ""
+        if '.rar' in dd_file_name:
+            patoolib.extract_archive(os.path.join(FOLDER_DOWNLOAD, dd_file_name), verbosity=-1, outdir='temprar', program='Resources/7z.exe')
+            archive = "temprar"
         # Unzip locally then copy all files, so we don't have problem erasing files while unziping
-        if '.zip' in dd_file_name:
-            os.makedirs('tempzip', exist_ok=True)
+        elif '.zip' in dd_file_name:
+            archive = "tempzip"
+            os.makedirs(archive, exist_ok=True)
             with ZipFile(os.path.join(FOLDER_DOWNLOAD, dd_file_name), 'r') as zip_ref:
-                zip_ref.extractall('tempzip')
-            list_file_zip = os.walk('tempzip')
-            for (dir_path, dir_names, file_names) in list_file_zip:
-                for file_name in file_names:
-                    full_file_path = os.path.join(dir_path, file_name)
-                    if dir_path=='tempzip': #So a direct file in folder
-                        local_path = ''
-                    else:
-                        local_path = dir_path.replace('tempzip'+os.path.sep, '')
-                    dest_folder = os.path.join(args.path, local_path)
-                    dest_file = os.path.join(dest_folder, file_name)
-                    if os.path.exists(dest_file):
-                        os.remove(dest_file)
-                    os.makedirs(dest_folder, exist_ok=True)
-                    shutil.copy(full_file_path, dest_folder)
-            shutil.rmtree('tempzip')
+                zip_ref.extractall(archive)
+        list_file_archive = os.walk(archive)
+        for (dir_path, dir_names, file_names) in list_file_archive:
+            for file_name in file_names:
+                full_file_path = os.path.join(dir_path, file_name)
+                if dir_path == archive:  # So a direct file in folder
+                    local_path = ''
+                else:
+                    local_path = dir_path.replace(archive + os.path.sep, '')
+                    if local_path in ['FFNxBattlefields', 'FFNxLunarCry', 'FFNxSeedReborn', 'FFNxTripod']:
+                        local_path = local_path.replace(mod_name, '')
+                if mod_name in ['FFNxBattlefields', 'FFNxLunarCry', 'FFNxSeedReborn', 'FFNxTripod']:
+                    local_path = local_path.replace(mod_name + os.path.sep, '')
+                dest_folder = os.path.join(args.path, local_path)
+                dest_file = os.path.join(dest_folder, file_name)
+                if os.path.exists(dest_file):
+                    os.remove(dest_file)
+                os.makedirs(dest_folder, exist_ok=True)
+                shutil.copy(full_file_path, dest_folder)
 
+        if archive != "":
+            shutil.rmtree(archive)
 
         if mod_name == "FFNx":
             ffnx_setup = read_ffnx_setup_file(ff8_path=args.path)
@@ -194,5 +205,5 @@ if __name__ == '__main__':
         # remove_test_file()
     if not args.keep_download_mod:
         shutil.rmtree(FOLDER_DOWNLOAD)
-    if 'FFNx' in github_mod_list:
+    if 'FFNx' in mod_file_list:
         write_ffnx_setup_file(args.path, ffnx_setup)

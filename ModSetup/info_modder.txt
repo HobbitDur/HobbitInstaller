@@ -1,5 +1,19 @@
-Here the main developers oof the mods:
+Here the main developers of the mods:
 FFNX: TrueOdin, myst6re, Cosmos, vertex2995
 HobbitGameplayMod: HobbitDur
 FFNxFF8Music: myst6re
 This installer: HobbitDur
+FF78Launcher: TrueOdin
+FFNxBattlefields: MCINDUS
+FFNxLunarCry: MCINDUS
+FFNxTripod: MCINDUS
+
+Here some info on the mods:
+FFNX: Low level tools to interface with the game
+HobbitGameplayMod: Hard mod that balance the game
+FFNxFF8Music: Better music
+This installer: Package manager
+FF78Launcher: To avoid having many click on launcher, just directly launch the game
+FFNxBattlefields: Improve battle field quality
+FFNxLunarCry: Improve monster quality
+FFNxTripod: Improve triple triad
