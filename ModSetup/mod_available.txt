@@ -5,4 +5,5 @@ FF78Launcher
 FFNxBattlefields
 FFNxLunarCry
 FFNxTripod
-HobbitGameplayMod
+HobbitGameplayMod-BETA
+FFVIII-Reloaded-FR-ONLY

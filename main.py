@@ -2,23 +2,16 @@ import argparse
 import os
 import shutil
 import sys
-from PyQt5.QtWidgets import QApplication
+from PyQt6.QtWidgets import QApplication
 
 from hobbitgui import WindowInstaller
 from modmanager import ModManager
 
-
-
-
-mod_file_list = []
-
-
-
-
-
-def remove_test_file():
-    shutil.rmtree(args.path)
-    os.makedirs(args.path)
+sys._excepthook = sys.excepthook
+def exception_hook(exctype, value, traceback):
+    print(exctype, value, traceback)
+    sys._excepthook(exctype, value, traceback)
+    sys.exit(1)
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(prog="Hobbit Installer", description="This program install mode for FF8")
@@ -28,6 +21,7 @@ if __name__ == '__main__':
 
     args = parser.parse_args()
 
+    sys.excepthook = exception_hook
     mod_manager = ModManager(ff8_path=args.path)
 
     app = QApplication.instance()
@@ -35,10 +29,4 @@ if __name__ == '__main__':
         app = QApplication(sys.argv)
 
     window_installer = WindowInstaller(mod_manager, keep_downloaded_mod=args.keep_download_mod)
-    sys.exit(app.exec_())
-
-    if args.test:
-        os.makedirs("FF8FolderTest", exist_ok=True)
-        if os.path.exists('tempzip'):
-            shutil.rmtree('tempzip')
-
+    sys.exit(app.exec())
