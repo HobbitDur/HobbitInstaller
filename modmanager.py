@@ -143,9 +143,11 @@ class ModManager():
         else:
             raise ValueError("Unexpected ELSE")
         archive = ""
+        print("Before extraction, file to extract: {}, with command: {}".format(os.path.join(self.FOLDER_DOWNLOAD, dd_file_name), os.path.join('Resources', '7z.exe')))
         if '.rar' in dd_file_name or '.7z' in dd_file_name:
             archive = "temparchive"
-            patoolib.extract_archive(os.path.join(self.FOLDER_DOWNLOAD, dd_file_name), verbosity=-1, outdir=archive, program=os.path.join('Resources', '7z.exe'))
+            patoolib.extract_archive(os.path.join(self.FOLDER_DOWNLOAD, dd_file_name), verbosity=-1, outdir=archive,
+                                     program=os.path.join('Resources', '7z.exe'))
         # Unzip locally then copy all files, so we don't have problem erasing files while unziping
         elif '.zip' in dd_file_name:
             archive = "tempzip"
@@ -168,6 +170,14 @@ class ModManager():
             else:
                 archive_to_copy = archive  # Shouldn't happen
             futur_path = os.path.join(self.ff8_path, 'Data', 'lang-fr')
+        elif mod_name == "Ragnarok-EN-ONLY":  # Special handle
+            if special_status[mod_name] == "Ragnarok standard":
+                archive_to_copy = os.path.join(archive, list_dir[index_folder],list_dir[index_folder], "Standard Mode files")
+            elif special_status[mod_name] == "Ragnarok lionheart":
+                archive_to_copy = os.path.join(archive, list_dir[index_folder],list_dir[index_folder], "Lionheart Mode files")
+            else:
+                archive_to_copy = archive  # Shouldn't happen
+            futur_path = os.path.join(self.ff8_path, 'Data')
         elif mod_name == "FF8Curiosite-FR-ONLY":
             archive_to_copy = archive  # Shouldn't happen
             futur_path = os.path.join(self.ff8_path, 'Data', 'lang-fr')
@@ -185,7 +195,7 @@ class ModManager():
             archive_to_copy = archive
             futur_path = self.ff8_path
         print("Archive to copy: {}, futur path: {}".format(archive_to_copy, futur_path))
-        shutil.copytree(archive_to_copy, futur_path, dirs_exist_ok=True, copy_function=shutil.copy)
+        shutil.copytree(archive_to_copy, futur_path, dirs_exist_ok=True, copy_function=shutil.copy)# shutil.copy to make it works on linux proton
         if archive != "":
             shutil.rmtree(archive)
         # remove_test_file()
