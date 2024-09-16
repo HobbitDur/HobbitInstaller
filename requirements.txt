@@ -5,6 +5,7 @@ idna==3.7
 packaging==24.1
 patool==2.3.0
 pefile==2023.2.7
+psutil==6.0.0
 pyinstaller==6.10.0
 pyinstaller-hooks-contrib==2024.8
 PyQt6==6.7.1

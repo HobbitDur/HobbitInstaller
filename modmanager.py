@@ -1,10 +1,11 @@
-import glob
 import json
 import os
 import re
 import shutil
-from os import write
+import subprocess
+import time
 from zipfile import ZipFile
+import psutil
 from ffnxmanager import FFNxManager
 import patoolib
 import requests
@@ -23,7 +24,6 @@ class ModManager():
     MOD_AVAILABLE_FILE = 'mod_available.txt'
     MOD_FILE_NAME = 'mod_file_name.txt'
     MOD_NAME_LIST = 'mod_name_list.txt'
-    LIST_MOD_TO_BE_SETUP = ['FFNxFF8Music', 'FFNx-RoseAndWine', 'Tsunamods-OST-RF']
     UPDATE_DATA_NAME = "UpdateData"
     SETUP_FILE = os.path.join(FOLDER_SETUP, "setup.json")
 
@@ -84,7 +84,7 @@ class ModManager():
                     dd_url = el[json_url]
         return dd_url
 
-    def install_mod(self, mod_name: str, keep_download_mod=False, special_status={}, download=True):
+    def install_mod(self, mod_name: str, keep_download_mod=False, special_status={}, download=True, ff8_version="ffnx"):
         os.makedirs(self.FOLDER_DOWNLOAD, exist_ok=True)
         print("Start installing mod: {}".format(mod_name))
         if mod_name == self.UPDATE_DATA_NAME:
@@ -108,7 +108,13 @@ class ModManager():
             else:
                 dd_file_name = self.mod_dict_json["download_name"]
         elif self.mod_dict_json[mod_name]["download_type"] == "direct":
-            direct_file = self.mod_dict_json[mod_name]['link']
+            if ff8_version == "ffnx":
+                direct_file = self.mod_dict_json[mod_name]['link']
+            elif ff8_version == "demaster":
+                direct_file = self.mod_dict_json[mod_name]['remaster-link']
+            else:
+                print("Error unexpected ff8_version: {}".format(ff8_version))
+                direct_file = self.mod_dict_json[mod_name]['link']
             if mod_name == "FFNxFF8Music":  # need remove " around
                 dd_file_name = self.mod_dict_json[mod_name]["download_name"]
             else:
@@ -179,6 +185,36 @@ class ModManager():
             os.makedirs(os.path.join(self.ff8_path, 'Data', 'Music', 'dmusic'), exist_ok=True)
             shutil.copy(os.path.join(archive, "064s-choco.sgt"), os.path.join(self.ff8_path, 'Data', 'Music', 'dmusic'))
             os.remove(os.path.join(archive, "064s-choco.sgt"))
+        elif mod_name == "Demaster": # Big special handle
+            installer_directory = os.getcwd()
+            print("Installing demaster - long process !")
+            if not os.path.isfile(os.path.join(self.ff8_path, "FFVIII_LAUNCHER.exe-original")):
+                print("First running the original launcher to create a config file, and waiting 10 sec that it launches")
+                os.chdir(os.path.join(self.ff8_path))
+                subprocess.run("FFVIII_LAUNCHER.exe")
+                time.sleep(10)
+                print("Now killing the launcher")
+                PROCNAME = "FFVIII_LAUNCHER.exe"
+                for proc in psutil.process_iter():
+                    # check whether the process name matches
+                    if proc.name() == PROCNAME:
+                        proc.kill()
+                os.chdir(installer_directory)
+                print("Copying demaster file to ff8")
+
+                shutil.copy(os.path.join(self.ff8_path, "FFVIII_LAUNCHER.exe"), os.path.join(self.ff8_path, "FFVIII_LAUNCHER.exe-original"))
+
+            archive_to_copy = os.path.join(archive, "EN_FR_IT_DE_ES_LATIN")
+            futur_path = os.path.join(self.ff8_path)
+            shutil.copytree(archive_to_copy, futur_path, dirs_exist_ok=True,
+                            copy_function=shutil.copy)
+            print("Now running the extractor, please accept by saying yes. Once it's over, please exit")
+            os.chdir(os.path.join(self.ff8_path))
+            subprocess.run("ffviii_demaster_manager.exe")
+            os.chdir(installer_directory)
+            archive_to_copy = ""
+            futur_path = ""
+
         elif 'DefaultFiles' in mod_name:
             futur_path = os.path.join(self.ff8_path, 'Data', 'lang-{}'.format(mod_name[-2:].lower()))
             archive_to_copy = os.path.join(archive, list_dir[index_folder])
@@ -191,23 +227,22 @@ class ModManager():
         else:
             archive_to_copy = archive
             futur_path = self.ff8_path
-        print("Archive to copy: {}, futur path: {}".format(archive_to_copy, futur_path))
-        shutil.copytree(archive_to_copy, futur_path, dirs_exist_ok=True,
-                        copy_function=shutil.copy)  # shutil.copy to make it works on linux proton
+        if archive_to_copy and futur_path:
+            print("Archive to copy: {}, futur path: {}".format(archive_to_copy, futur_path))
+            shutil.copytree(archive_to_copy, futur_path, dirs_exist_ok=True,
+                            copy_function=shutil.copy)  # shutil.copy to make it works on linux proton
         if archive != "":
             shutil.rmtree(archive)
         # remove_test_file()
         if not keep_download_mod:
             shutil.rmtree(self.FOLDER_DOWNLOAD)
 
-        if mod_name in self.LIST_MOD_TO_BE_SETUP:
+        ffnx_param = self.mod_dict_json[mod_name]["ffnx_param"]
+        if ffnx_param and ff8_version == "ffnx":
             print("Updating FFNx.toml file for mod {}".format(mod_name))
             if not os.path.join(self.ff8_path, "FFNx.toml"):
                 with open(os.path.join(self.ff8_path, "FFNx.toml"), "w") as file:
                     pass
-            ffnx_param = self.mod_dict_json[mod_name]["ffnx_param"]
-            print(ffnx_param)
-            if ffnx_param:
                 self.ffnx_manager.change_ffnx_option(ffnx_param, self.ff8_path)
 
     def update_data(self):
