@@ -3,8 +3,9 @@ import sys
 
 from PyQt6 import sip
 from PyQt6.QtCore import Qt, QCoreApplication, QThreadPool, QRunnable, QObject, pyqtSignal, pyqtSlot, QThread
-from PyQt6.QtGui import QIcon
-from PyQt6.QtWidgets import QApplication, QWidget, QPushButton, QVBoxLayout, QCheckBox, QMessageBox, QProgressDialog, QMainWindow, QProgressBar, QRadioButton, \
+from PyQt6.QtGui import QIcon, QFont
+from PyQt6.QtWidgets import QApplication, QWidget, QPushButton, QVBoxLayout, QCheckBox, QMessageBox, QProgressDialog, \
+    QMainWindow, QProgressBar, QRadioButton, \
     QLabel, QFrame, QStyle, QSizePolicy, QButtonGroup, QComboBox, QHBoxLayout
 
 from modmanager import ModManager
@@ -37,6 +38,7 @@ class WindowInstaller(QWidget):
     MOD_CHECK_DEFAULT = ['FFNx', 'FF78Launcher', 'Tsunamods-OST-RF']
     VERSION_LIST = ["FF8 Steam 2013", "FF8 Remastered"]
     LANG_LIST = ["en", "fr", "de"]
+    MOD_TYPE_LIST = ["All", "Wrapper", "Graphical", "Music", "Gameplay", "EaseOfLife"]
 
     def __init__(self, mod_manager, icon_path='Resources'):
 
@@ -68,6 +70,7 @@ class WindowInstaller(QWidget):
         self.layout_setup = QVBoxLayout()
         self.layout_ff8_version = QHBoxLayout()
         self.layout_language = QHBoxLayout()
+        self.layout_mod_type = QHBoxLayout()
         self.layout_mod = QVBoxLayout()
         self.layout_ragnarok = QVBoxLayout()
         self.layout_ff8reloaded = QVBoxLayout()
@@ -115,20 +118,35 @@ class WindowInstaller(QWidget):
     def __setup_setup(self):
         # Setup
         self.label_setup = QLabel(parent=self, text="Setup parameters")
+        self.label_setup.setFont(QFont('Arial', 12))
+        self.label_setup.setStyleSheet("font-weight: bold")
+        self.label_setup.setAlignment(Qt.AlignmentFlag.AlignCenter)
         self.download = QCheckBox(parent=self, text="Download from internet")
         self.download.setChecked(True)
+        self.download.setToolTip(
+            "Check to download from internet, uncheck to use previously downloaded files and kept with the keep mod_archive")
         self.keep_mod_archive = QCheckBox(parent=self, text="Keep mod_archive")
         self.keep_mod_archive.setChecked(False)
+        self.keep_mod_archive.setToolTip("To keep the downloaded files from the internet, to be able to reuse them")
 
         self.ff8_version_label = QLabel(parent=self, text="FF8 Version")
         self.ff8_version = QComboBox(parent=self)
         self.ff8_version.addItems(self.VERSION_LIST)
         self.ff8_version.activated.connect(self.reload_gui)
+        self.ff8_version.setToolTip(
+            "Your FF8 version, either the classic one from steam released in 2013, or the remaster.")
 
         self.language_label = QLabel(parent=self, text="FF8 language")
         self.language = QComboBox(parent=self)
         self.language.addItems(self.LANG_LIST)
         self.language.activated.connect(self.reload_gui)
+        self.language.setToolTip("The language you play on")
+
+        self.mod_type_label = QLabel(parent=self, text="Mod type")
+        self.mod_type = QComboBox(parent=self)
+        self.mod_type.addItems(self.MOD_TYPE_LIST)
+        self.mod_type.activated.connect(self.reload_gui)
+        self.mod_type.setToolTip("To sort all mods by type")
 
         self.separator = QFrame(self)
         self.separator.setFrameStyle(0x04)  # Can't find QFrame.HLine so here we are
@@ -136,7 +154,9 @@ class WindowInstaller(QWidget):
 
     def __setup_mod(self):
         self.label_mod = QLabel("Mod selection")
-
+        self.label_mod.setFont(QFont('Arial', 12))
+        self.label_mod.setStyleSheet("font-weight: bold")
+        self.label_mod.setAlignment(Qt.AlignmentFlag.AlignCenter)
         # FFVIII Reloaded
         self.ff8reloaded_classic = QRadioButton(parent=self, text="FF8 Reloaded Classic")
         self.ff8reloaded_classic.setChecked(True)
@@ -173,17 +193,24 @@ class WindowInstaller(QWidget):
             if mod_name != "UpdateData":  # It's our "local mod" to update the setup.json
                 if mod_info["download_type"] == 'github' or mod_info["download_type"] == 'direct':
                     if self.language.currentText() in mod_info["lang"]:
-                        if (self.ff8_version.currentText() == self.VERSION_LIST[0] and "ffnx" in mod_info["compatibility"]) \
-                                or (self.ff8_version.currentText() == self.VERSION_LIST[1] and "demaster" in mod_info["compatibility"]):
-                            self.mod_checkbox[mod_name] = QCheckBox(parent=self, text=mod_name)
-                            if mod_name in self.MOD_CHECK_DEFAULT:
-                                self.mod_checkbox[mod_name].setChecked(True)
-                            if mod_name == self.FF8_RELOAD_NAME:
-                                self.mod_checkbox[mod_name].toggled.connect(self.activate_ff8reload)
-                            elif mod_name == self.RAGNAROK_NAME:
-                                self.mod_checkbox[mod_name].toggled.connect(self.activate_ragnarok)
+                        if (self.ff8_version.currentText() == self.VERSION_LIST[0] and "ffnx" in mod_info[
+                            "compatibility"]) \
+                                or (self.ff8_version.currentText() == self.VERSION_LIST[1] and "demaster" in mod_info[
+                            "compatibility"]):
+                            if self.mod_type.currentText() == "All" or (
+                                    self.mod_type.currentText() == mod_info["mod_type"]):
+                                self.mod_checkbox[mod_name] = QCheckBox(parent=self, text=mod_name)
+                                self.mod_checkbox[mod_name].setToolTip(
+                                    "Author: {}\nDescription: {}".format(mod_info["modder_name"], mod_info["mod_info"]))
+                                if mod_name in self.MOD_CHECK_DEFAULT:
+                                    self.mod_checkbox[mod_name].setChecked(True)
+                                if mod_name == self.FF8_RELOAD_NAME:
+                                    self.mod_checkbox[mod_name].toggled.connect(self.activate_ff8reload)
+                                elif mod_name == self.RAGNAROK_NAME:
+                                    self.mod_checkbox[mod_name].toggled.connect(self.activate_ragnarok)
                 else:
-                    print("No type found for mod {} with value {}".format(mod_name, self.mod_manager.mod_dict[mod_name]))
+                    print(
+                        "No type found for mod {} with value {}".format(mod_name, mod_info[mod_name]))
 
     def __setup_setup_layout(self):
         self.layout_setup.addWidget(self.label_setup)
@@ -193,9 +220,13 @@ class WindowInstaller(QWidget):
         self.layout_language.addWidget(self.language_label)
         self.layout_language.addWidget(self.language)
         self.layout_language.addStretch(1)
+        self.layout_mod_type.addWidget(self.mod_type_label)
+        self.layout_mod_type.addWidget(self.mod_type)
+        self.layout_mod_type.addStretch(1)
 
         self.layout_setup.addLayout(self.layout_language)
         self.layout_setup.addLayout(self.layout_ff8_version)
+        self.layout_setup.addLayout(self.layout_mod_type)
         self.layout_setup.addWidget(self.download)
         self.layout_setup.addWidget(self.keep_mod_archive)
         self.layout_setup.addWidget(self.separator)
@@ -277,7 +308,9 @@ class WindowInstaller(QWidget):
         self.progress.show()
         mod_to_be_installed = []
         special_status = {}
-        for mod_name in self.mod_manager.mod_file_list:
+        for mod_name, mod_info in self.mod_manager.mod_dict_json.items():
+            if mod_name not in self.mod_checkbox.keys():
+                continue
             if mod_name == self.FF8_RELOAD_NAME:
                 if self.ff8reloaded_classic.isChecked():
                     special_status[self.FF8_RELOAD_NAME] = self.ff8reloaded_classic.text()
@@ -295,7 +328,8 @@ class WindowInstaller(QWidget):
         self.progress.setRange(0, len(mod_to_be_installed) + 1)
         self.progress.setValue(1)
         download = self.download.isChecked()
-        self.install_requested.emit(self.mod_manager, mod_to_be_installed, self.keep_mod_archive.isChecked(), special_status, download)
+        self.install_requested.emit(self.mod_manager, mod_to_be_installed, self.keep_mod_archive.isChecked(),
+                                    special_status, download)
 
     def update_data_click(self):
         self.progress.show()
