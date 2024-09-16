@@ -33,7 +33,7 @@ class WindowInstaller(QWidget):
     FF8_RELOAD_NAME = "FFVIII-Reloaded-FR-ONLY"
     RAGNAROK_NAME = "Ragnarok-EN-ONLY"
     LIST_SPECIAL_MOD = [FF8_RELOAD_NAME, RAGNAROK_NAME]
-    MOD_CHECK_DEFAULT = ['FFNx', 'FFNxFF8Music']
+    MOD_CHECK_DEFAULT = ['FFNx', 'FF78Launcher', 'FFNx-OST-RF']
     def __init__(self, mod_manager, icon_path='Resources'):
 
         QWidget.__init__(self)
@@ -176,7 +176,6 @@ class WindowInstaller(QWidget):
     def __setup_mod_layout(self):
         self.layout_mod.addWidget(self.label_mod)
         for key, mod in self.mod_checkbox.items():
-            print(key)
             if key not in self.LIST_SPECIAL_MOD:
                 self.layout_mod.addWidget(mod)
             else:
@@ -267,7 +266,6 @@ class WindowInstaller(QWidget):
         self.progress.setRange(0, len(mod_to_be_installed)+1)
         self.progress.setValue(1)
         download = self.download.isChecked()
-
         self.install_requested.emit(self.mod_manager, mod_to_be_installed, self.keep_mod_archive.isChecked(), special_status, download)
 
     def update_data_click(self):
