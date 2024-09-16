@@ -213,7 +213,7 @@ class ModManager():
                 zip_ref.extractall(archive)
         list_dir = os.listdir(archive)
         try:
-            index_folder = os.listdir(archive).index(dd_file_name.split('.')[0])
+            index_folder = os.listdir(archive).index(dd_file_name.rsplit('.', 1)[0])
 
         except ValueError:
             index_folder = -1
