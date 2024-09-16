@@ -21,22 +21,21 @@ class FFNxManager():
                 file.write(line + '\n')
 
     def change_ffnx_music_option(self):
-        for i, line in enumerate(self.ffnx_setup):
-            for param, value in self.MUSIC_FFNX_PARAM_CHANGE.items():
-                if param in line and '=' in line:
-                    line_split = line.split('=')
-                    self.ffnx_setup[i] = line_split[0] + "=" + value + "#Value changed by HobbitInstaller"
 
+        self.__change_music_option(self.MUSIC_FFNX_PARAM_CHANGE.items())
     def change_rosewine_music_option(self):
+        self.__change_music_option(self.MUSIC_ROSE_WINE_PARAM_CHANGE.items())
+    def change_ost_rf_music_option(self):
+        self.__change_music_option(self.MUSIC_OST_RF_PARAM_CHANGE.items())
+
+    def __change_music_option(self, music_items):
+        print(music_items)
         for i, line in enumerate(self.ffnx_setup):
-            for param, value in self.MUSIC_ROSE_WINE_PARAM_CHANGE.items():
+            for param, value in music_items:
                 if param in line and '=' in line:
+                    print(line)
+                    print(param)
+                    print(value)
                     line_split = line.split('=')
                     self.ffnx_setup[i] = line_split[0] + "=" + value + "#Value changed by HobbitInstaller"
 
-    def change_ost_rf_music_option(self):
-        for i, line in enumerate(self.ffnx_setup):
-            for param, value in self.MUSIC_OST_RF_PARAM_CHANGE.items():
-                if param in line and '=' in line:
-                    line_split = line.split('=')
-                    self.ffnx_setup[i] = line_split[0] + "=" + value + "#Value changed by HobbitInstaller"

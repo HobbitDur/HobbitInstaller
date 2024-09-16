@@ -6,7 +6,6 @@ from PyQt6.QtCore import Qt, QCoreApplication, QThreadPool, QRunnable, QObject, 
 from PyQt6.QtGui import QIcon
 from PyQt6.QtWidgets import QApplication, QWidget, QPushButton, QVBoxLayout, QCheckBox, QMessageBox, QProgressDialog, QMainWindow, QProgressBar, QRadioButton, \
     QLabel, QFrame, QStyle, QSizePolicy, QButtonGroup
-from PyQt6.uic.properties import QtCore
 
 from modmanager import ModManager
 

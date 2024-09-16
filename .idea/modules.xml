@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="ProjectModuleManager">
+    <modules>
+      <module fileurl="file://$PROJECT_DIR$/.idea/HobbitInstaller.iml" filepath="$PROJECT_DIR$/.idea/HobbitInstaller.iml" />
+      <module fileurl="file://$PROJECT_DIR$/../ifrit-enhanced/PythonAutomatisation/.idea/PythonAutomatisation.iml" filepath="$PROJECT_DIR$/../ifrit-enhanced/PythonAutomatisation/.idea/PythonAutomatisation.iml" />
+    </modules>
+  </component>
+</project>
