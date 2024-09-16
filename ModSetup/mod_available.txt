@@ -1,5 +1,6 @@
 FFNx
 FFNxFF8Music
+FFNx-RoseAndWine
 FF78Launcher
 FFNxBattlefields
 FFNxLunarCry
