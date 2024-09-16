@@ -5,7 +5,7 @@ FFNx
 FF78Launcher
 FFNxFF8Music
 FFNx-RoseAndWine
-FFNx-OST-RF
+Tsunamods-OST-RF
 FFNxBattlefields
 FFNxLunarCry
 FFNxTripod
