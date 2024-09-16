@@ -35,6 +35,9 @@ class ModManager():
         self.ffnx_manager = FFNxManager()
         os.makedirs(self.FOLDER_DOWNLOAD, exist_ok=True)
         self.ff8_path = ff8_path
+        self.__init_mod_data()
+
+    def __init_mod_data(self):
         self.__read_setup_files()
         self.__load_mod_list()
         self.__load_github_info()
@@ -42,6 +45,9 @@ class ModManager():
         self.__load_mod_file_name()
 
     def __read_setup_files(self):
+        self.buffer_git_list_mod.clear()
+        self.buffer_tag_mod.clear()
+        self.buffer_direct_link_mod.clear()
         with (open(self.GIT_MOD_FILE, "r") as f):
             self.buffer_git_list_mod = f.read().split('\n')
         with (open(self.GIT_TAG_FILE, "r") as f):
@@ -52,16 +58,21 @@ class ModManager():
             raise ValueError("The file {} and file {} doesn't have the same number of line !".format(self.GIT_MOD_FILE, self.GIT_TAG_FILE))
 
     def __load_mod_file_name(self):
+        self.mod_list_file_name.clear()
         with open(os.path.join(self.FOLDER_SETUP, self.MOD_FILE_NAME), "r") as file:
             self.mod_list_file_name.extend(file.read().split('\n'))
+            self.mod_list_file_name = [x for x in self.mod_list_file_name if x != '']
 
     def __load_mod_list(self):
+        self.mod_file_list.clear()
         with open(os.path.join(self.FOLDER_SETUP, self.MOD_AVAILABLE_FILE), "r") as file:
             self.mod_file_list.extend(file.read().split('\n'))
+            self.mod_file_list = [x for x in self.mod_file_list if x != '']
 
     def __load_github_info(self):
         # Loading github info for all github mod
-        self.github_mod_list = []
+        self.github_mod_list.clear()
+        self.mod_dict.clear()
         for i in range(len(self.buffer_git_list_mod)):
             current_mod = self.buffer_git_list_mod[i].split(self.SEP_CHAR)[0]
             # Searching the corresponding tag
@@ -71,12 +82,12 @@ class ModManager():
             else:
                 current_mod_tag = current_mod_tag[0]
             self.github_mod_list.append(current_mod)
-            self.mod_dict[current_mod] = {'type': 'github', 'mod_name':self.buffer_git_list_mod[i].split(self.SEP_CHAR)[0] , 'github': self.buffer_git_list_mod[i].split(self.SEP_CHAR)[1], 'tag': current_mod_tag}
-
+            self.mod_dict[current_mod] = {'type': 'github', 'mod_name': self.buffer_git_list_mod[i].split(self.SEP_CHAR)[0],
+                                          'github': self.buffer_git_list_mod[i].split(self.SEP_CHAR)[1], 'tag': current_mod_tag}
 
     def __load_direct_link_info(self):
         # Loading link info for all direct link mod
-        self.direct_link_mod_list = []
+        self.direct_link_mod_list.clear()
         for direct_mod in self.buffer_direct_link_mod:
             current_mod = direct_mod.split(self.SEP_CHAR)[0]
             self.mod_dict[current_mod] = {'type': 'direct_link', 'link': direct_mod.split(self.SEP_CHAR)[1]}
@@ -105,6 +116,7 @@ class ModManager():
         github_link = self.mod_dict[mod_name]['github'] + self.GITHUB_RELEASE_PATH
         github_link = github_link.replace('github.com', 'api.github.com/repos')
         return github_link
+
     def __get_github_url_file(self, mod_name: str, json_url="assets_url"):
         json_link = self.__get_github_link(mod_name)
         json_file = self.download_file(json_link, headers={'content-type': 'application/json'})[0]
@@ -117,6 +129,7 @@ class ModManager():
                 if el['tag_name'] == self.mod_dict[mod_name]['tag']:
                     dd_url = el[json_url]
         return dd_url
+
     def install_mod(self, mod_name: str, keep_download_mod=False, special_status={}, download=True):
         os.makedirs(self.FOLDER_DOWNLOAD, exist_ok=True)
 
@@ -153,7 +166,8 @@ class ModManager():
         else:
             raise ValueError("Unexpected ELSE")
         archive = ""
-        print("Before extraction, file to extract: {}, with command: {}".format(os.path.join(self.FOLDER_DOWNLOAD, dd_file_name), os.path.join('Resources', '7z.exe')))
+        print("Before extraction, file to extract: {}, with command: {}".format(os.path.join(self.FOLDER_DOWNLOAD, dd_file_name),
+                                                                                os.path.join('Resources', '7z.exe')))
         if '.rar' in dd_file_name or '.7z' in dd_file_name:
             archive = "temparchive"
             patoolib.extract_archive(os.path.join(self.FOLDER_DOWNLOAD, dd_file_name), verbosity=-1, outdir=archive,
@@ -182,9 +196,9 @@ class ModManager():
             futur_path = os.path.join(self.ff8_path, 'Data', 'lang-fr')
         elif mod_name == "Ragnarok-EN-ONLY":  # Special handle
             if special_status[mod_name] == "Ragnarok standard":
-                archive_to_copy = os.path.join(archive, list_dir[index_folder],list_dir[index_folder], "Standard Mode files")
+                archive_to_copy = os.path.join(archive, list_dir[index_folder], list_dir[index_folder], "Standard Mode files")
             elif special_status[mod_name] == "Ragnarok lionheart":
-                archive_to_copy = os.path.join(archive, list_dir[index_folder],list_dir[index_folder], "Lionheart Mode files")
+                archive_to_copy = os.path.join(archive, list_dir[index_folder], list_dir[index_folder], "Lionheart Mode files")
             else:
                 archive_to_copy = archive  # Shouldn't happen
             futur_path = os.path.join(self.ff8_path, 'Data')
@@ -207,7 +221,7 @@ class ModManager():
             archive_to_copy = archive
             futur_path = self.ff8_path
         print("Archive to copy: {}, futur path: {}".format(archive_to_copy, futur_path))
-        shutil.copytree(archive_to_copy, futur_path, dirs_exist_ok=True, copy_function=shutil.copy)# shutil.copy to make it works on linux proton
+        shutil.copytree(archive_to_copy, futur_path, dirs_exist_ok=True, copy_function=shutil.copy)  # shutil.copy to make it works on linux proton
         if archive != "":
             shutil.rmtree(archive)
         # remove_test_file()
@@ -226,6 +240,6 @@ class ModManager():
 
             self.ffnx_manager.write_ffnx_setup_file(self.ff8_path)
 
-
     def update_data(self):
         self.install_mod(self.UPDATE_DATA_NAME)
+        self.__init_mod_data()
