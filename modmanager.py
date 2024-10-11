@@ -4,12 +4,16 @@ import re
 import shutil
 import subprocess
 import time
+from enum import Enum
 from zipfile import ZipFile
 import psutil
 from ffnxmanager import FFNxManager
 import patoolib
 import requests
-
+class ModType(Enum):
+    RAGNAROK = 1
+    RELOADED = 2
+    DIRECT_IMPORT = 3
 
 class ModManager:
     FOLDER_SETUP = os.path.join("HobbitInstaller-data", "ModSetup")
@@ -78,9 +82,20 @@ class ModManager:
                     dd_url = el[json_url]
         return dd_url
 
-    def install_mod(self, mod_name: str, keep_download_mod=False, special_status={}, download=True, ff8_version="ffnx"):
+    def install_mod(self, mod_name: str, keep_download_mod=False, special_status={}, download=True, ff8_version="ffnx", backup=True):
+
+        try:
+            print("Backing up the data")
+            with ZipFile(os.path.join(self.ff8_path, "backup_data.zip"), 'x') as zip_ref:
+                zip_ref.write(os.path.join(self.ff8_path, "Data"))
+        except FileExistsError:
+            print(f"File backup_data.zip already exist")
+
+
         os.makedirs(self.FOLDER_DOWNLOAD, exist_ok=True)
         print("Start installing mod: {}".format(mod_name))
+
+
         if mod_name == self.UPDATE_DATA_NAME:
             dd_url = self.__get_github_url_file(self.UPDATE_DATA_NAME, "zipball_url")
             dd_file_name = self.download_file(dd_url, write_file=True)[1]
