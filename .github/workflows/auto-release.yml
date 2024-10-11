@@ -1,0 +1,102 @@
+name: Auto-release
+
+on:
+  push:
+    branches: [ "master" ]
+    tags:
+      - "*"
+  pull_request:
+    branches: [ "master" ]
+  workflow_dispatch:
+
+jobs:
+  create_assets:
+      runs-on: windows-latest
+      steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          submodules: 'true'
+      - name: Set up Python 3.12
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+          pip install pyinstaller
+          python --version
+          pip freeze
+      - uses: milliewalky/setup-7-zip@v1
+      - name: Create release
+        shell: bash
+        run: |
+          pyinstaller -n HobbitInstaller -F --specpath release/build --distpath release --workpath release/build --onefile --noconsole --icon=../../Resources/icon.ico main.py
+          mkdir -p release/HobbitInstaller
+          mkdir -p release/HobbitInstaller/FF8GameData
+          cp -R Resources release/HobbitInstaller/
+          cp release/*.exe release/HobbitInstaller/
+          cd release
+          rm -r build
+          rm *.exe
+      - name: zip name continuous
+        shell: bash
+        if: github.event.ref_type != 'tag' && github.ref == 'refs/heads/master'
+        run: |
+          cd release/HobbitInstaller
+          7z  a -tzip "../HobbitInstaller-continuous-${{ github.sha}}.zip" .
+          pwd
+      - name: zip name tag
+        shell: bash
+        if: startsWith(github.ref, 'refs/tags/')
+        run: |
+          cd release/HobbitInstaller
+          7z  a -tzip "../HobbitInstaller-${{  github.ref_name }}.zip" .  
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: "artifact-${{ github.sha}}"
+          path: ${{ github.workspace }}/release/
+  release_assets:
+    name: Release
+    needs:
+    - create_assets
+    runs-on: windows-latest
+    concurrency: release-${{ github.ref }}
+    steps:
+    - name: Download Files
+      uses: actions/download-artifact@v4
+      with:
+        path: ${{ github.workspace }}/release/
+    - name: Test
+      shell: bash
+      run: |
+        ls -al
+        cd release
+        ls -al
+        echo  ${{ github.event_name }}
+        echo  ${{ github.event.ref_type }}
+        echo  ${{ github.ref}}
+        echo  ${{ github.ref_name}}
+        echo  ${{ github.sha}} | cut -c1-7
+    - name: Deploy Package
+      if: github.event.ref_type != 'tag' && github.ref == 'refs/heads/master'
+      uses: crowbarmaster/GH-Automatic-Releases@latest
+      with:
+        repo_token: "${{ secrets.GITHUB_TOKEN }}"
+        automatic_release_tag: "continuous"
+        prerelease: true
+        title: "Unstable Build"
+        files: |
+          release/artifact-*/*
+    - name: Deploy tag Package
+      if:  startsWith(github.ref, 'refs/tags/')
+      uses: crowbarmaster/GH-Automatic-Releases@latest
+      with:
+        repo_token: "${{ secrets.GITHUB_TOKEN }}"
+        prerelease: false
+        automatic_release_tag: ${{ github.ref_name }}
+        title: "HobbitInstaller-${{ github.ref_name }}"
+        files: |
+          release/artifact-*/*
