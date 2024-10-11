@@ -1,8 +1,7 @@
 import os
-import sys
 
 from PyQt6 import sip
-from PyQt6.QtCore import Qt, QCoreApplication, QThreadPool, QRunnable, QObject, pyqtSignal, pyqtSlot, QThread
+from PyQt6.QtCore import Qt, QCoreApplication, QThreadPool, QRunnable, QObject, pyqtSignal, pyqtSlot, QThread, QSize
 from PyQt6.QtGui import QIcon, QFont
 from PyQt6.QtWidgets import QApplication, QWidget, QPushButton, QVBoxLayout, QCheckBox, QMessageBox, QProgressDialog, \
     QMainWindow, QProgressBar, QRadioButton, \
@@ -60,10 +59,18 @@ class WindowInstaller(QWidget):
         # Main window
         self.setWindowTitle("HobbitInstaller")
         self.setMinimumWidth(300)
-        self.setWindowIcon(QIcon(os.path.join(icon_path, 'icon.png')))
+        self.__icon = QIcon(os.path.join(icon_path, 'icon.png'))
+        self.setWindowIcon(self.__icon)
         self.__setup_setup()
         self.__setup_mod()
         self.__setup_main()
+
+        self.info_button = QPushButton()
+        self.info_button.setIcon(QIcon(os.path.join(icon_path, 'info.png')))
+        self.info_button.setIconSize(QSize(30, 30))
+        self.info_button.setFixedSize(40, 40)
+        self.info_button.setToolTip("Show toolmaker info")
+        self.info_button.clicked.connect(self.__show_info)
 
         self.layout_main = QVBoxLayout()
         self.layout_setup = QVBoxLayout()
@@ -75,6 +82,15 @@ class WindowInstaller(QWidget):
         self.layout_ff8reloaded = QVBoxLayout()
         self.setup_layout()
         self.show_all()
+
+    def __show_info(self):
+        message_box = QMessageBox()
+        message_box.setText(f"Tool done by <b>Hobbitdur</b>.<br/>"
+                            f"You can support me on <a href='https://www.patreon.com/HobbitMods'>Patreon</a>.<br/>")
+        message_box.setIcon(QMessageBox.Icon.Information)
+        message_box.setWindowIcon(self.__icon)
+        message_box.setWindowTitle("HobbitInstaller - Info")
+        message_box.exec()
 
     def __clear_one_layout(self, layout):
         if layout:
@@ -213,7 +229,11 @@ class WindowInstaller(QWidget):
                         "No type found for mod {} with value {}".format(mod_name, mod_info[mod_name]))
 
     def __setup_setup_layout(self):
-        self.layout_setup.addWidget(self.label_setup)
+        self.layout_title = QHBoxLayout()
+        self.layout_title.addWidget(self.info_button)
+        self.layout_title.addWidget(self.label_setup)
+        self.layout_setup.addLayout(self.layout_title)
+
         self.layout_ff8_version.addWidget(self.ff8_version_label)
         self.layout_ff8_version.addWidget(self.ff8_version)
         self.layout_ff8_version.addStretch(1)

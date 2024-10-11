@@ -1,2 +1,4 @@
 PyQt6>=6.7.1
-patool>=2.3.0
+psutil>=6.0.0
+patool>=3.0.1
+requests>=2.32.3
