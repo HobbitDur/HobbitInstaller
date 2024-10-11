@@ -38,7 +38,7 @@ class WindowInstaller(QWidget):
     LANG_LIST = ["en", "fr", "de"]
     MOD_TYPE_LIST = ["All", "Wrapper", "Graphical", "Music", "Gameplay", "EaseOfLife"]
 
-    def __init__(self, mod_manager, icon_path='Resources'):
+    def __init__(self, mod_manager, icon_path=os.path.join("HobbitInstaller-data", 'Resources')):
 
         QWidget.__init__(self)
         # Managing thread

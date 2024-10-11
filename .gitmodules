@@ -1,0 +1,3 @@
+[submodule "HobbitInstaller-data"]
+	path = HobbitInstaller-data
+	url = https://github.com/HobbitDur/HobbitInstaller-data.git

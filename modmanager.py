@@ -11,19 +11,13 @@ import patoolib
 import requests
 
 
-class ModManager():
-    FOLDER_SETUP = "ModSetup"
-    GIT_MOD_FILE = os.path.join(FOLDER_SETUP, "git_mod_list.txt")
-    GIT_TAG_FILE = os.path.join(FOLDER_SETUP, "git_tag.txt")
-    DIRECT_LINK_FILE = os.path.join(FOLDER_SETUP, "direct_link.txt")
+class ModManager:
+    FOLDER_SETUP = os.path.join("HobbitInstaller-data", "ModSetup")
     SEP_CHAR = '>'
     FOLDER_DOWNLOAD = "ModDownloaded"
     TYPE_DOWNLOAD = 'Steam'
     GITHUB_RELEASE_TAG_PATH = "/releases/tag/"
     GITHUB_RELEASE_PATH = "/releases"
-    MOD_AVAILABLE_FILE = 'mod_available.txt'
-    MOD_FILE_NAME = 'mod_file_name.txt'
-    MOD_NAME_LIST = 'mod_name_list.txt'
     UPDATE_DATA_NAME = "UpdateData"
     SETUP_FILE = os.path.join(FOLDER_SETUP, "setup.json")
 
@@ -37,7 +31,7 @@ class ModManager():
     def __init_mod_data(self):
         with open(self.SETUP_FILE) as f:
             self.mod_dict_json = json.load(f)['AvailableMods']
-            #self.mod_dict_json = self.mod_dict_json['AvailableMods']
+            # self.mod_dict_json = self.mod_dict_json['AvailableMods']
 
     def download_file(self, link, headers={}, write_file=False, file_name=None, dest_path=FOLDER_DOWNLOAD):
         print("Downloading with link: {}".format(link))
@@ -142,11 +136,11 @@ class ModManager():
         archive = ""
         print("Before extraction, file to extract: {}, with command: {}".format(
             os.path.join(self.FOLDER_DOWNLOAD, dd_file_name),
-            os.path.join('Resources', '7z.exe')))
+            os.path.join("HobbitInstaller-data", 'Resources', '7z.exe')))
         if '.rar' in dd_file_name or '.7z' in dd_file_name:
             archive = "temparchive"
             patoolib.extract_archive(os.path.join(self.FOLDER_DOWNLOAD, dd_file_name), verbosity=-1, outdir=archive,
-                                     program=os.path.join('Resources', '7z.exe'))
+                                     program=os.path.join("HobbitInstaller-data", 'Resources', '7z.exe'))
         # Unzip locally then copy all files, so we don't have problem erasing files while unziping
         elif '.zip' in dd_file_name:
             archive = "tempzip"
@@ -185,11 +179,12 @@ class ModManager():
             os.makedirs(os.path.join(self.ff8_path, 'Data', 'Music', 'dmusic'), exist_ok=True)
             shutil.copy(os.path.join(archive, "064s-choco.sgt"), os.path.join(self.ff8_path, 'Data', 'Music', 'dmusic'))
             os.remove(os.path.join(archive, "064s-choco.sgt"))
-        elif mod_name == "Demaster": # Big special handle
+        elif mod_name == "Demaster":  # Big special handle
             installer_directory = os.getcwd()
             print("Installing demaster - long process !")
             if not os.path.isfile(os.path.join(self.ff8_path, "FFVIII_LAUNCHER.exe-original")):
-                print("First running the original launcher to create a config file, and waiting 10 sec that it launches")
+                print(
+                    "First running the original launcher to create a config file, and waiting 10 sec that it launches")
                 os.chdir(os.path.join(self.ff8_path))
                 subprocess.run("FFVIII_LAUNCHER.exe")
                 time.sleep(10)
@@ -202,7 +197,8 @@ class ModManager():
                 os.chdir(installer_directory)
                 print("Copying demaster file to ff8")
 
-                shutil.copy(os.path.join(self.ff8_path, "FFVIII_LAUNCHER.exe"), os.path.join(self.ff8_path, "FFVIII_LAUNCHER.exe-original"))
+                shutil.copy(os.path.join(self.ff8_path, "FFVIII_LAUNCHER.exe"),
+                            os.path.join(self.ff8_path, "FFVIII_LAUNCHER.exe-original"))
 
             archive_to_copy = os.path.join(archive, "EN_FR_IT_DE_ES_LATIN")
             futur_path = os.path.join(self.ff8_path)
@@ -220,7 +216,7 @@ class ModManager():
             archive_to_copy = os.path.join(archive, list_dir[index_folder])
         elif mod_name == self.UPDATE_DATA_NAME:
             archive_to_copy = os.path.join(archive, list_dir[index_folder])
-            futur_path = os.getcwd()
+            futur_path = os.path.join(os.getcwd(), "HobbitInstaller-data")
         elif index_folder >= 0:  # If the extract contain the folder name itself
             archive_to_copy = os.path.join(archive, list_dir[index_folder])
             futur_path = self.ff8_path
