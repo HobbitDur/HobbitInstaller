@@ -12,16 +12,20 @@ class ListModWidget(QWidget):
     FF8_RELOAD_NAME = "FFVIII-Reloaded-FR-ONLY"
     RAGNAROK_NAME = "Ragnarok-EN-ONLY"
     LIST_SPECIAL_MOD = [FF8_RELOAD_NAME, RAGNAROK_NAME]
-    VERSION_LIST = ["FF8 PC 2000", "FF8 Steam 2013", "FF8 Remastered"] # To remove from here
-    def __init__(self, mod_manager, lang, ff8_version, mod_type ):
-        QWidget.__init__(self)
-        self.setSizePolicy(QSizePolicy.Policy.Maximum,QSizePolicy.Policy.Maximum)
+    VERSION_LIST = ["FF8 PC 2000", "FF8 Steam 2013", "FF8 Remastered"]  # To remove from here
 
+    def __init__(self, mod_manager, lang, ff8_version, mod_type):
+        QWidget.__init__(self)
+        # self.setSizePolicy(QSizePolicy.Policy.Maximum, QSizePolicy.Policy.Maximum)
+        self.sizePolicy().setControlType(QSizePolicy.ControlType.CheckBox)
         self.layout_main = QVBoxLayout()
+        self.setLayout(self.layout_main)
+        self.layout_main.setSpacing(0)
+        #self.layout_main.setContentsMargins(-1,-1,-1,0)
         self.layout_mod = QVBoxLayout()
 
-        self.layout_ragnarok = QVBoxLayout()
-        self.layout_ff8reloaded = QVBoxLayout()
+        # self.layout_ragnarok = QVBoxLayout()
+        # self.layout_ff8reloaded = QVBoxLayout()
         self.mod_manager = mod_manager
 
         self.label_mod = QLabel("Mod selection")
@@ -37,7 +41,7 @@ class ListModWidget(QWidget):
                 continue
             if mod_name not in self.LIST_SPECIAL_MOD:
                 self.mod_list.append(Mod(mod_name, ModType.DIRECT_IMPORT, mod_info))
-                self.mod_widget_list.append(ModWidget(mod_manager,self.mod_list[-1] ))
+                self.mod_widget_list.append(ModWidget(mod_manager, self.mod_list[-1]))
             else:
                 if mod_name == self.FF8_RELOAD_NAME:
                     self.mod_list.append(Mod(mod_name, ModType.RELOADED, mod_info))
@@ -48,13 +52,13 @@ class ListModWidget(QWidget):
 
         for mod_widget in self.mod_widget_list:
             self.layout_mod.addWidget(mod_widget)
+            # self.layout_mod.addStretch(1)
 
         self.layout_main.addWidget(self.label_mod)
         self.layout_main.addLayout(self.layout_mod)
         self.layout_main.addStretch(1)
-        self.setLayout(self.layout_main)
 
-        self.show_specific_mod(lang, ff8_version, mod_type)
+        # self.show_specific_mod(lang, ff8_version, mod_type)
 
     def show_specific_mod(self, lang, ff8_version, mod_type):
         for mod_widget in self.mod_widget_list:
@@ -63,8 +67,8 @@ class ListModWidget(QWidget):
                 if mod_widget.mod.mod_info["download_type"] == 'github' or mod_widget.mod.mod_info["download_type"] == 'direct':
                     if lang in mod_widget.mod.mod_info["lang"]:
                         if (ff8_version in (self.VERSION_LIST[0], self.VERSION_LIST[1]) and "ffnx" in mod_widget.mod.mod_info["compatibility"]) \
-                                or ( ff8_version == self.VERSION_LIST[2] and "demaster" in mod_widget.mod.mod_info["compatibility"]):
-                            if mod_type in ("All" ,mod_widget.mod.mod_info["mod_type"]):
+                                or (ff8_version == self.VERSION_LIST[2] and "demaster" in mod_widget.mod.mod_info["compatibility"]):
+                            if mod_type in ("All", mod_widget.mod.mod_info["mod_type"]):
                                 if mod_widget.mod.mod_info["default_selected"] == "true":
                                     mod_widget.selected(True)
                                 mod_found = True
@@ -81,4 +85,3 @@ class ListModWidget(QWidget):
                 mod_to_be_installed.append(mod_widget.mod.name)
             special_status = mod_widget.get_special_status()
         return mod_to_be_installed, special_status
-

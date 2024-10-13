@@ -54,7 +54,7 @@ class WindowInstaller(QWidget):
         # Main window
         self.setWindowTitle("HobbitInstaller")
         #self.setMinimumWidth(300)
-        self.setSizePolicy(QSizePolicy.Policy.Maximum, QSizePolicy.Policy.Maximum)
+        #self.setSizePolicy(QSizePolicy.Policy.Maximum, QSizePolicy.Policy.Maximum)
         self.__icon = QIcon(os.path.join(icon_path, 'icon.png'))
         self.__icon_info = QIcon(os.path.join(icon_path, 'info.png'))
         self.setWindowIcon(self.__icon)
@@ -205,6 +205,7 @@ class WindowInstaller(QWidget):
     def __setup_main_layout(self):
         self.layout_main.addLayout(self.layout_setup)
         self.layout_main.addWidget(self.mod_widget)
+        self.layout_main.addWidget(self.restore_button)
         self.layout_main.addWidget(self.update_data_button)
         self.layout_main.addWidget(self.install_button)
         self.layout_main.addWidget(self.progress)
@@ -245,10 +246,11 @@ class WindowInstaller(QWidget):
         self.update_data_requested.emit(self.mod_manager)
 
     def restore_click(self):
-        self.progress.show()
-        self.progress.setRange(0, 1)
-        self.progress.setValue(0)
-        self.update_data_requested.emit(self.mod_manager)
+        pass
+        #self.progress.show()
+        #self.progress.setRange(0, 1)
+        #self.progress.setValue(0)
+        #self.update_data_requested.emit(self.mod_manager)
 
     def install_progress(self, nb_install_done):
         self.progress.setValue(nb_install_done + 1)
