@@ -53,7 +53,7 @@ class WindowInstaller(QWidget):
 
         # Main window
         self.setWindowTitle("HobbitInstaller")
-        #self.setMinimumWidth(300)
+        #self.setMinimumWidth(700)
         #self.setSizePolicy(QSizePolicy.Policy.Maximum, QSizePolicy.Policy.Maximum)
         self.__icon = QIcon(os.path.join(icon_path, 'icon.png'))
         self.__icon_info = QIcon(os.path.join(icon_path, 'info.png'))
@@ -188,6 +188,10 @@ class WindowInstaller(QWidget):
         self.layout_ff8_version.addWidget(self.ff8_version_label)
         self.layout_ff8_version.addWidget(self.ff8_version)
         self.layout_ff8_version.addStretch(1)
+
+        self.layout_mod_type.addWidget(self.mod_type_label)
+        self.layout_mod_type.addWidget(self.mod_type)
+        self.layout_mod_type.addStretch(1)
 
         self.layout_language.addWidget(self.language_label)
         self.layout_language.addWidget(self.language)

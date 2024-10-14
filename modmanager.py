@@ -15,6 +15,14 @@ class ModType(Enum):
     RELOADED = 2
     DIRECT_IMPORT = 3
 
+class GroupModType(Enum):
+    WRAPPER = 1
+    GRAPHIC = 2
+    GAMEPLAY = 3
+    MUSIC = 4
+    EASEOFLIFE = 5
+    ALL = 6
+
 class ModManager:
     FOLDER_SETUP = os.path.join("HobbitInstaller-data", "ModSetup")
     SEP_CHAR = '>'
@@ -24,6 +32,7 @@ class ModManager:
     GITHUB_RELEASE_PATH = "/releases"
     UPDATE_DATA_NAME = "UpdateData"
     SETUP_FILE = os.path.join(FOLDER_SETUP, "setup.json")
+    VERSION_LIST = ["FF8 PC 2000", "FF8 Steam 2013", "FF8 Remastered"]
 
     def __init__(self, ff8_path='.'):
         self.ffnx_manager = FFNxManager()
@@ -35,7 +44,28 @@ class ModManager:
     def __init_mod_data(self):
         with open(self.SETUP_FILE) as f:
             self.mod_dict_json = json.load(f)['AvailableMods']
-            # self.mod_dict_json = self.mod_dict_json['AvailableMods']
+        for mod_name in self.mod_dict_json:
+            if self.mod_dict_json[mod_name]["mod_type"] == "Wrapper":
+                self.mod_dict_json[mod_name]["mod_type"] = GroupModType.WRAPPER
+            elif self.mod_dict_json[mod_name]["mod_type"] == "Gameplay":
+                self.mod_dict_json[mod_name]["mod_type"] = GroupModType.GAMEPLAY
+            elif self.mod_dict_json[mod_name]["mod_type"] == "Music":
+                self.mod_dict_json[mod_name]["mod_type"] = GroupModType.MUSIC
+            elif self.mod_dict_json[mod_name]["mod_type"] == "EaseOfLife":
+                self.mod_dict_json[mod_name]["mod_type"] = GroupModType.EASEOFLIFE
+            elif self.mod_dict_json[mod_name]["mod_type"] == "Graphical":
+                self.mod_dict_json[mod_name]["mod_type"] = GroupModType.GRAPHIC
+            else:
+                print(f"Unexpected Group mod: {self.mod_dict_json[mod_name]["mod_type"]}")
+            if self.mod_dict_json[mod_name]["default_selected"] == "true":
+                self.mod_dict_json[mod_name]["default_selected"] = True
+            elif self.mod_dict_json[mod_name]["default_selected"] == "false":
+                self.mod_dict_json[mod_name]["default_selected"] = False
+            else:
+                print(f"Unexpected default selection: {self.mod_dict_json[mod_name]["default_selected"]}")
+                self.mod_dict_json[mod_name]["default_selected"] = False
+
+
 
     def download_file(self, link, headers={}, write_file=False, file_name=None, dest_path=FOLDER_DOWNLOAD):
         print("Downloading with link: {}".format(link))

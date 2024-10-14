@@ -3,7 +3,7 @@ import os
 import sys
 from PyQt6.QtWidgets import QApplication
 
-from hobbitgui import WindowInstaller
+from view.hobbitgui import WindowInstaller
 from modmanager import ModManager
 
 sys._excepthook = sys.excepthook

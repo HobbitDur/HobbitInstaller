@@ -15,21 +15,22 @@ class ModWidget(QWidget):
     def __init__(self, mod_manager, mod:Mod):
         QWidget.__init__(self)
 
+
+        self.mod_manager = mod_manager
+        self.mod = mod
+
         self.select = QCheckBox(parent=self, text=mod.name)
         self.select.stateChanged.connect(self._state_changed)
         self.select.setToolTip(f"Author: {mod.mod_info["modder_name"]}\nDescription: {mod.mod_info["mod_info"]}")
+        self.select.setChecked(mod.mod_info["default_selected"])
         #self.setSizePolicy(self.select.sizePolicy())
-
-
 
         self.layout_main = QVBoxLayout()
         self.setLayout(self.layout_main)
         #self.layout_main.setSpacing(10)
-        self.layout_main.setContentsMargins(-1, 2, -1, 2)
+        #self.layout_main.setContentsMargins(-1, 2, -1, 2)
         #self.layout_mod= QVBoxLayout()
 
-        self.mod_manager = mod_manager
-        self.mod = mod
         #self.setSizePolicy(QSizePolicy.Policy.Maximum,QSizePolicy.Policy.Maximum)
         #size_policy = self.sizePolicy()
         #size_policy.setControlType(QSizePolicy.ControlType.CheckBox)
@@ -42,45 +43,45 @@ class ModWidget(QWidget):
         self.layout_main.addWidget(self.select)
 
         # FFVIII Reloaded
-        # if mod.get_type() == ModType.RELOADED:
-        #     self.layout_ff8reloaded = QVBoxLayout()
-        #     self.ff8reloaded_classic = QRadioButton(parent=self, text="FF8 Reloaded Classic")
-        #     self.ff8reloaded_classic.setChecked(True)
-        #     self.ff8reloaded_classic.toggled.connect(lambda: self._ff8reloadedstate(self.ff8reloaded_classic))
-        #     self.ff8reloaded_classic.hide()
-        #     self.ff8reloaded_level1 = QRadioButton(parent=self, text="FF8 Reloaded Level 1")
-        #     self.ff8reloaded_level1.toggled.connect(lambda: self._ff8reloadedstate(self.ff8reloaded_level1))
-        #     self.ff8reloaded_level1.hide()
-        #     self.ff8reloaded_level100 = QRadioButton(parent=self, text="FF8 Reloaded Level 100")
-        #     self.ff8reloaded_level100.toggled.connect(lambda: self._ff8reloadedstate(self.ff8reloaded_level100))
-        #     self.ff8reloaded_level100.hide()
-        #     self.parent_ff8reloaded = QButtonGroup(self)
-        #     self.parent_ff8reloaded.addButton(self.ff8reloaded_classic)
-        #     self.parent_ff8reloaded.addButton(self.ff8reloaded_level1)
-        #     self.parent_ff8reloaded.addButton(self.ff8reloaded_level100)
-        #     self.select.stateChanged.connect(self._activate_ff8reload)
-        #
-        #     self.layout_mod.addWidget(self.ff8reloaded_classic)
-        #     self.layout_mod.addWidget(self.ff8reloaded_level1)
-        #     self.layout_mod.addWidget(self.ff8reloaded_level100)
-        #
-        # # Ragnarok
-        # elif mod.get_type()  == ModType.RAGNAROK:
-        #     self.layout_ragnarok = QVBoxLayout()
-        #     self.ragnarok_standard = QRadioButton(parent=self, text="Ragnarok standard")
-        #     self.ragnarok_standard.setChecked(True)
-        #     self.ragnarok_standard.toggled.connect(lambda: self._ragnarokstate(self.ragnarok_standard))
-        #     self.ragnarok_standard.hide()
-        #     self.ragnarok_lionheart = QRadioButton(parent=self, text="Ragnarok lionheart")
-        #     self.ragnarok_lionheart.toggled.connect(lambda: self._ragnarokstate(self.ragnarok_lionheart))
-        #     self.ragnarok_lionheart.hide()
-        #     self.parent_ragnarok = QButtonGroup(self)
-        #     self.parent_ragnarok.addButton(self.ragnarok_standard)
-        #     self.parent_ragnarok.addButton(self.ragnarok_lionheart)
-        #
-        #     self.layout_mod.addWidget(self.ragnarok_standard)
-        #     self.layout_mod.addWidget(self.ragnarok_lionheart)
-        #     self.select.stateChanged.connect(self._activate_ragnarok)
+        if mod.get_type() == ModType.RELOADED:
+            self.layout_ff8reloaded = QVBoxLayout()
+            self.ff8reloaded_classic = QRadioButton(parent=self, text="FF8 Reloaded Classic")
+            self.ff8reloaded_classic.setChecked(True)
+            self.ff8reloaded_classic.toggled.connect(lambda: self._ff8reloadedstate(self.ff8reloaded_classic))
+            self.ff8reloaded_classic.hide()
+            self.ff8reloaded_level1 = QRadioButton(parent=self, text="FF8 Reloaded Level 1")
+            self.ff8reloaded_level1.toggled.connect(lambda: self._ff8reloadedstate(self.ff8reloaded_level1))
+            self.ff8reloaded_level1.hide()
+            self.ff8reloaded_level100 = QRadioButton(parent=self, text="FF8 Reloaded Level 100")
+            self.ff8reloaded_level100.toggled.connect(lambda: self._ff8reloadedstate(self.ff8reloaded_level100))
+            self.ff8reloaded_level100.hide()
+            self.parent_ff8reloaded = QButtonGroup(self)
+            self.parent_ff8reloaded.addButton(self.ff8reloaded_classic)
+            self.parent_ff8reloaded.addButton(self.ff8reloaded_level1)
+            self.parent_ff8reloaded.addButton(self.ff8reloaded_level100)
+            self.select.stateChanged.connect(self._activate_ff8reload)
+
+            self.layout_main.addWidget(self.ff8reloaded_classic)
+            self.layout_main.addWidget(self.ff8reloaded_level1)
+            self.layout_main.addWidget(self.ff8reloaded_level100)
+
+        # Ragnarok
+        elif mod.get_type()  == ModType.RAGNAROK:
+            self.layout_ragnarok = QVBoxLayout()
+            self.ragnarok_standard = QRadioButton(parent=self, text="Ragnarok standard")
+            self.ragnarok_standard.setChecked(True)
+            self.ragnarok_standard.toggled.connect(lambda: self._ragnarokstate(self.ragnarok_standard))
+            self.ragnarok_standard.hide()
+            self.ragnarok_lionheart = QRadioButton(parent=self, text="Ragnarok lionheart")
+            self.ragnarok_lionheart.toggled.connect(lambda: self._ragnarokstate(self.ragnarok_lionheart))
+            self.ragnarok_lionheart.hide()
+            self.parent_ragnarok = QButtonGroup(self)
+            self.parent_ragnarok.addButton(self.ragnarok_standard)
+            self.parent_ragnarok.addButton(self.ragnarok_lionheart)
+
+            self.layout_main.addWidget(self.ragnarok_standard)
+            self.layout_main.addWidget(self.ragnarok_lionheart)
+            self.select.stateChanged.connect(self._activate_ragnarok)
 
         #self.layout_main.addLayout(self.layout_mod)
         #self.layout_main.addStretch(1)
@@ -90,7 +91,6 @@ class ModWidget(QWidget):
         size_policy.setVerticalPolicy(QSizePolicy.Policy.Fixed)
         #self.setSizePolicy(size_policy)
         #self.select.updateGeometry()
-        print(self.select.size().height())
         #self.setFixedHeight(self.select.size().height())
         self.select.updateGeometry()
         self.updateGeometry()
@@ -125,12 +125,6 @@ class ModWidget(QWidget):
     def selected(self, selected):
         self.select.setChecked(selected)
         self.mod.activated = selected
-    #
-    # def show(self):
-    #     super().show()
-    # def hide(self):
-    #     super().hide()
-    #     self.selected(False)
 
     def get_special_status(self):
         special_status = {}
