@@ -4,24 +4,16 @@ import re
 import shutil
 import subprocess
 import time
+import types
 from enum import Enum
 from zipfile import ZipFile
 import psutil
 from ffnxmanager import FFNxManager
 import patoolib
 import requests
-class ModType(Enum):
-    RAGNAROK = 1
-    RELOADED = 2
-    DIRECT_IMPORT = 3
 
-class GroupModType(Enum):
-    WRAPPER = 1
-    GRAPHIC = 2
-    GAMEPLAY = 3
-    MUSIC = 4
-    EASEOFLIFE = 5
-    ALL = 6
+from model.mod import GroupModType, ModLang, ModWrapper, Mod, ModType
+
 
 class ModManager:
     FOLDER_SETUP = os.path.join("HobbitInstaller-data", "ModSetup")
@@ -55,6 +47,8 @@ class ModManager:
                 self.mod_dict_json[mod_name]["mod_type"] = GroupModType.EASEOFLIFE
             elif self.mod_dict_json[mod_name]["mod_type"] == "Graphical":
                 self.mod_dict_json[mod_name]["mod_type"] = GroupModType.GRAPHIC
+            elif self.mod_dict_json[mod_name]["mod_type"] == "Setup":
+                self.mod_dict_json[mod_name]["mod_type"] = GroupModType.SETUP
             else:
                 print(f"Unexpected Group mod: {self.mod_dict_json[mod_name]["mod_type"]}")
             if self.mod_dict_json[mod_name]["default_selected"] == "true":
@@ -65,11 +59,53 @@ class ModManager:
                 print(f"Unexpected default selection: {self.mod_dict_json[mod_name]["default_selected"]}")
                 self.mod_dict_json[mod_name]["default_selected"] = False
 
+            if self.mod_dict_json[mod_name]["lang"]:
+                for index_lang, lang in enumerate(self.mod_dict_json[mod_name]["lang"]):
+                    if lang == "en":
+                        new_lang = ModLang.EN
+                    elif lang == "fr":
+                        new_lang = ModLang.FR
+                    elif lang == "de":
+                        new_lang = ModLang.DE
+                    elif lang == "es":
+                        new_lang = ModLang.ES
+                    elif lang == "it":
+                        new_lang = ModLang.IT
+                    else:
+                        print(f"Unexpected lang selection: {self.mod_dict_json[mod_name]["lang"]}")
+                        new_lang = ModLang.EN
+                    self.mod_dict_json[mod_name]["lang"][index_lang] = new_lang
 
+            if self.mod_dict_json[mod_name]["compatibility"]:
+                if self.mod_dict_json[mod_name]["compatibility"] == "False":  # Temp fix
+                    self.mod_dict_json[mod_name]["compatibility"] = [ModWrapper.FFNX, ModWrapper.DEMASTER]
+                else:
+                    for index_compat, compat in enumerate(self.mod_dict_json[mod_name]["compatibility"]):
+                        if compat == "ffnx":
+                            new_compat = ModWrapper.FFNX
+                        elif compat == "demaster":
+                            new_compat = ModWrapper.DEMASTER
+                        else:
+                            print(f"Unexpected compatibility selection: {self.mod_dict_json[mod_name]["compatibility"]}")
+                            new_compat = ModWrapper.FFNX
+                        self.mod_dict_json[mod_name]["compatibility"][index_compat] = new_compat
 
-    def download_file(self, link, headers={}, write_file=False, file_name=None, dest_path=FOLDER_DOWNLOAD):
+    def __download_file(self, link, download_update_func: types.MethodType = None, headers={}, write_file=False, file_name=None, dest_path=FOLDER_DOWNLOAD):
         print("Downloading with link: {}".format(link))
-        request_return = requests.get(link, headers=headers)
+        request_return = requests.get(link, headers=headers, stream=True)
+        response = requests.get(link, stream=True)
+
+        if download_update_func:
+            total_length = response.headers.get('content-length')
+            if total_length is None:  # no content length header
+                download_update_func(-1, -1)
+            else:
+                dl = 0
+                total_length = int(total_length)
+                for data in response.iter_content(chunk_size=4096):
+                    dl += len(data)
+                    download_update_func(dl, total_length)
+
         if not file_name:
             if "Content-Disposition" in request_return.headers.keys():
                 file_name = re.findall("filename\*?=['\"]?(?:UTF-\d['\"]*)?([^;\r\n\"']*)['\"]?;?",
@@ -99,42 +135,51 @@ class ModManager:
         github_link = github_link.replace('github.com', 'api.github.com/repos')
         return github_link
 
-    def __get_github_url_file(self, mod_name: str, json_url="assets_url"):
-        json_link = self.__get_github_link(mod_name)
-        json_file = self.download_file(json_link, headers={'content-type': 'application/json'})[0]
+    def __get_github_url_file(self, mod: Mod, json_url="assets_url"):
+        json_link = self.__get_github_link(mod.name)
+        json_file = self.__download_file(json_link, headers={'content-type': 'application/json'})[0]
         json_file = json_file.json()
         dd_url = ""
-        if self.mod_dict_json[mod_name]['git_tag'] == 'latest':
+        if mod.info['git_tag'] == 'latest':
             dd_url = json_file[0][json_url]
         else:  # Searching the tag
             for el in json_file:
-                if el['tag_name'] == self.mod_dict_json[mod_name]['git_tag']:
+                if el['tag_name'] == mod.info['git_tag']:
                     dd_url = el[json_url]
         return dd_url
 
-    def install_mod(self, mod_name: str, keep_download_mod=False, special_status={}, download=True, ff8_version="ffnx", backup=True):
-
+    def restore_backup(self):
         try:
-            print("Backing up the data")
-            with ZipFile(os.path.join(self.ff8_path, "backup_data.zip"), 'x') as zip_ref:
-                zip_ref.write(os.path.join(self.ff8_path, "Data"))
-        except FileExistsError:
-            print(f"File backup_data.zip already exist")
+            archive = self.ff8_path
+            with ZipFile(os.path.join(self.ff8_path, "backup_data.zip"), 'r') as zip_ref:
+                zip_ref.extractall(archive)
+            return True
+        except FileNotFoundError:
+            print(f"/!\\ File backup_data.zip doesn't exist, fail restoring")
+            return False
 
+    def install_mod(self, mod: Mod, download_update_func: types.MethodType, keep_download_mod=False, download=True, ff8_wrapper=ModWrapper.FFNX, backup=True):
+        if backup:
+            try:
+                print("Backing up the data")
+                shutil.make_archive("backup_data.zip", 'zip', "Data")
+            except FileExistsError:
+                print(f"File backup_data.zip already exist")
+            except FileNotFoundError:
+                print("No Data file found for backup, are you sure you are in the FF8 folder ?")
 
         os.makedirs(self.FOLDER_DOWNLOAD, exist_ok=True)
-        print("Start installing mod: {}".format(mod_name))
+        print("Start installing mod: {}".format(mod.name))
 
-
-        if mod_name == self.UPDATE_DATA_NAME:
-            dd_url = self.__get_github_url_file(self.UPDATE_DATA_NAME, "zipball_url")
-            dd_file_name = self.download_file(dd_url, write_file=True)[1]
-        elif self.mod_dict_json[mod_name]["download_type"] == "github":
+        if mod.get_type() == ModType.SETUP:
+            dd_url = self.__get_github_url_file(mod, "zipball_url")
+            dd_file_name = self.__download_file(dd_url, download_update_func, write_file=True)[1]
+        elif mod.info["download_type"] == "github":
             if download:
-                dd_url = self.__get_github_url_file(mod_name, "assets_url")
-                json_file = self.download_file(dd_url, headers={'content-type': 'application/json'})[0].json()
+                dd_url = self.__get_github_url_file(mod, "assets_url")
+                json_file = self.__download_file(dd_url, download_update_func, headers={'content-type': 'application/json'})[0].json()
                 asset_link = ""
-                if mod_name == 'FFNx':
+                if mod.name == 'FFNx':
                     for el in json_file:
                         if self.TYPE_DOWNLOAD in el['browser_download_url']:
                             asset_link = el['browser_download_url']
@@ -143,25 +188,25 @@ class ModManager:
                     asset_link = json_file[0]['browser_download_url']
                 else:
                     print("Didn't manage several asset without a particular case")
-                dd_file_name = self.download_file(asset_link, write_file=True)[1]
+                dd_file_name = self.__download_file(asset_link, download_update_func, write_file=True)[1]
             else:
                 dd_file_name = self.mod_dict_json["download_name"]
-        elif self.mod_dict_json[mod_name]["download_type"] == "direct":
-            if ff8_version == "ffnx":
-                direct_file = self.mod_dict_json[mod_name]['link']
-            elif ff8_version == "demaster":
-                direct_file = self.mod_dict_json[mod_name]['remaster-link']
+        elif mod.info["download_type"] == "direct":
+            if ff8_wrapper == ModWrapper.FFNX:
+                direct_file = mod.info['link']
+            elif ff8_wrapper == ModWrapper.DEMASTER:
+                direct_file = mod.info['remaster-link']
             else:
-                print("Error unexpected ff8_version: {}".format(ff8_version))
-                direct_file = self.mod_dict_json[mod_name]['link']
-            if mod_name == "FFNxFF8Music":  # need remove " around
-                dd_file_name = self.mod_dict_json[mod_name]["download_name"]
+                print("Error unexpected ff8_version: {}".format(ff8_wrapper))
+                direct_file = mod.info['link']
+            if mod.name == "FFNxFF8Music":  # need remove " around
+                dd_file_name = mod.info["download_name"]
             else:
                 dd_file_name = None
             if download:
-                dd_file_name = self.download_file(direct_file, write_file=True, file_name=dd_file_name)[1]
+                dd_file_name = self.__download_file(direct_file, download_update_func, write_file=True, file_name=dd_file_name)[1]
             else:
-                dd_file_name = self.mod_dict_json[mod_name]["download_name"]
+                dd_file_name = self.mod_dict_json[mod.name]["download_name"]
         else:
             raise ValueError("Unexpected ELSE")
 
@@ -198,33 +243,19 @@ class ModManager:
 
         except ValueError:
             index_folder = -1
-        if mod_name == "FFVIII-Reloaded-FR-ONLY":  # Special handle
-            if special_status[mod_name] == "FF8 Reloaded Classic":
-                archive_to_copy = os.path.join(archive, "FFVIII Reloaded classic")
-            elif special_status[mod_name] == "FF8 Reloaded Level 1":
-                archive_to_copy = os.path.join(archive, "FFVIII Reloaded level 1")
-            elif special_status[mod_name] == "FF8 Reloaded Level 100":
-                archive_to_copy = os.path.join(archive, "FFVIII Reloaded level 100")
-            else:
-                archive_to_copy = archive  # Shouldn't happen
+        if mod.get_type() == ModType.RELOADED:  # Special handle
+            archive_to_copy = os.path.join(archive, mod.special_status)
             futur_path = os.path.join(self.ff8_path, 'Data', 'lang-fr')
-        elif mod_name == "Ragnarok-EN-ONLY":  # Special handle
-            if special_status[mod_name] == "Ragnarok standard":
-                archive_to_copy = os.path.join(archive, list_dir[index_folder], list_dir[index_folder],
-                                               "Standard Mode files")
-            elif special_status[mod_name] == "Ragnarok lionheart":
-                archive_to_copy = os.path.join(archive, list_dir[index_folder], list_dir[index_folder],
-                                               "Lionheart Mode files")
-            else:
-                archive_to_copy = archive  # Shouldn't happen
+        elif mod.get_type() == ModType.RAGNAROK:
+            archive_to_copy = os.path.join(archive, list_dir[index_folder], list_dir[index_folder], mod.special_status)
             futur_path = os.path.join(self.ff8_path, 'Data')
-        elif mod_name == "FF8Curiosite-FR-ONLY":
-            archive_to_copy = archive  # Shouldn't happen
+        elif mod.name == "FF8Curiosite-FR-ONLY":
+            archive_to_copy = archive
             futur_path = os.path.join(self.ff8_path, 'Data', 'lang-fr')
             os.makedirs(os.path.join(self.ff8_path, 'Data', 'Music', 'dmusic'), exist_ok=True)
             shutil.copy(os.path.join(archive, "064s-choco.sgt"), os.path.join(self.ff8_path, 'Data', 'Music', 'dmusic'))
             os.remove(os.path.join(archive, "064s-choco.sgt"))
-        elif mod_name == "Demaster":  # Big special handle
+        elif mod.name == "Demaster":  # Big special handle
             installer_directory = os.getcwd()
             print("Installing demaster - long process !")
             if not os.path.isfile(os.path.join(self.ff8_path, "FFVIII_LAUNCHER.exe-original")):
@@ -256,10 +287,10 @@ class ModManager:
             archive_to_copy = ""
             futur_path = ""
 
-        elif 'DefaultFiles' in mod_name:
-            futur_path = os.path.join(self.ff8_path, 'Data', 'lang-{}'.format(mod_name[-2:].lower()))
+        elif 'DefaultFiles' in mod.name:
+            futur_path = os.path.join(self.ff8_path, 'Data', 'lang-{}'.format(mod.name[-2:].lower()))
             archive_to_copy = os.path.join(archive, list_dir[index_folder])
-        elif mod_name == self.UPDATE_DATA_NAME:
+        elif mod.get_type() == ModType.SETUP:
             archive_to_copy = os.path.join(archive, list_dir[index_folder])
             futur_path = os.path.join(os.getcwd(), "HobbitInstaller-data")
         elif index_folder >= 0:  # If the extract contain the folder name itself
@@ -278,14 +309,14 @@ class ModManager:
         if not keep_download_mod:
             shutil.rmtree(self.FOLDER_DOWNLOAD)
 
-        ffnx_param = self.mod_dict_json[mod_name]["ffnx_param"]
-        if ffnx_param and ff8_version == "ffnx":
-            print("Updating FFNx.toml file for mod {}".format(mod_name))
+        ffnx_param = mod.info["ffnx_param"]
+        if ffnx_param and ff8_wrapper == "ffnx":
+            print("Updating FFNx.toml file for mod {}".format(mod.name))
             if not os.path.join(self.ff8_path, "FFNx.toml"):
                 with open(os.path.join(self.ff8_path, "FFNx.toml"), "w") as file:
                     pass
                 self.ffnx_manager.change_ffnx_option(ffnx_param, self.ff8_path)
 
-    def update_data(self):
-        self.install_mod(self.UPDATE_DATA_NAME)
+    def update_mod_list(self):
+        self.install_mod(Mod(self.UPDATE_DATA_NAME, self.mod_dict_json[self.UPDATE_DATA_NAME]))
         self.__init_mod_data()

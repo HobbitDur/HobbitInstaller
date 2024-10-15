@@ -1,10 +1,9 @@
 from PyQt6.QtCore import Qt, QSize
 from PyQt6.QtGui import QFont
 from PyQt6.QtWidgets import QWidget, QRadioButton, QButtonGroup, QLabel, QHBoxLayout, QVBoxLayout, QComboBox, QCheckBox, \
-    QSizePolicy
+    QSizePolicy, QLayout
 
-from model.mod import Mod
-from modmanager import ModType
+from model.mod import Mod, ModType
 
 
 class ModWidget(QWidget):
@@ -21,23 +20,21 @@ class ModWidget(QWidget):
 
         self.select = QCheckBox(parent=self, text=mod.name)
         self.select.stateChanged.connect(self._state_changed)
-        self.select.setToolTip(f"Author: {mod.mod_info["modder_name"]}\nDescription: {mod.mod_info["mod_info"]}")
-        self.select.setChecked(mod.mod_info["default_selected"])
+        self.select.setToolTip(f"Author: {mod.info["modder_name"]}\nDescription: {mod.info["mod_info"]}")
+        self.select.setChecked(mod.info["default_selected"])
         #self.setSizePolicy(self.select.sizePolicy())
 
         self.layout_main = QVBoxLayout()
         self.setLayout(self.layout_main)
         #self.layout_main.setSpacing(10)
-        #self.layout_main.setContentsMargins(-1, 2, -1, 2)
+        self.layout_main.setContentsMargins(0, 0, 0, 0)
         #self.layout_mod= QVBoxLayout()
 
-        #self.setSizePolicy(QSizePolicy.Policy.Maximum,QSizePolicy.Policy.Maximum)
+        self.setSizePolicy(QSizePolicy.Policy.Minimum,QSizePolicy.Policy.Minimum)
         #size_policy = self.sizePolicy()
         #size_policy.setControlType(QSizePolicy.ControlType.CheckBox)
         #size_policy.setVerticalPolicy(QSizePolicy.Policy.Fixed)
         #size_policy.setHorizontalPolicy(QSizePolicy.Policy.Minimum)
-
-
 
         #self.layout_mod.addWidget(self.select)
         self.layout_main.addWidget(self.select)
@@ -92,17 +89,18 @@ class ModWidget(QWidget):
         #self.setSizePolicy(size_policy)
         #self.select.updateGeometry()
         #self.setFixedHeight(self.select.size().height())
-        self.select.updateGeometry()
+        self.layout_main.setSizeConstraint(QLayout.SizeConstraint.SetFixedSize)
+        self._update_special_status()
         self.updateGeometry()
 
     def _state_changed(self):
         self.mod.activated = self.select.isChecked()
 
     def _ff8reloadedstate(self, b):
-        pass
+        self._update_special_status()
 
     def _ragnarokstate(self, b):
-        pass
+        self._update_special_status()
 
     def _activate_ff8reload(self):
         if self.mod.activated:
@@ -122,22 +120,21 @@ class ModWidget(QWidget):
             self.ragnarok_standard.hide()
             self.ragnarok_lionheart.hide()
 
-    def selected(self, selected):
+    def set_selected(self, selected):
         self.select.setChecked(selected)
         self.mod.activated = selected
 
-    def get_special_status(self):
-        special_status = {}
-        if self.mod.name == self.FF8_RELOAD_NAME:
-            if self.ff8reloaded_classic.isChecked():
-                special_status[self.FF8_RELOAD_NAME] = self.ff8reloaded_classic.text()
-            elif self.ff8reloaded_level1.isChecked():
-                special_status[self.FF8_RELOAD_NAME] = self.ff8reloaded_level1.text()
-            elif self.ff8reloaded_level100.isChecked():
-                special_status[self.FF8_RELOAD_NAME] = self.ff8reloaded_level100.text()
-        elif self.mod.name == self.RAGNAROK_NAME:
-            if self.ragnarok_standard.isChecked():
-                special_status[self.RAGNAROK_NAME] = self.ragnarok_standard.text()
-            elif self.ragnarok_lionheart.isChecked():
-                special_status[self.RAGNAROK_NAME] = self.ragnarok_lionheart.text()
-        return special_status
+    def _update_special_status(self):
+        if self.select.isChecked():
+            if self.mod.get_type() == ModType.RELOADED:
+                if self.ff8reloaded_classic.isChecked():
+                    self.mod.special_status = self.ff8reloaded_classic.text()
+                elif self.ff8reloaded_level1.isChecked():
+                    self.mod.special_status = self.ff8reloaded_level1.text()
+                elif self.ff8reloaded_level100.isChecked():
+                    self.mod.special_status = self.ff8reloaded_level100.text()
+            elif self.mod.get_type() == ModType.RAGNAROK:
+                if self.ragnarok_standard.isChecked():
+                    self.mod.special_status = self.ragnarok_standard.text()
+                elif self.ragnarok_lionheart.isChecked():
+                    self.mod.special_status = self.ragnarok_lionheart.text()

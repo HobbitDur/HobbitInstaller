@@ -1,4 +1,5 @@
 import argparse
+import faulthandler
 import os
 import sys
 from PyQt6.QtWidgets import QApplication
@@ -19,13 +20,15 @@ if __name__ == '__main__':
     parser.add_argument("-kdm", "--keep_download_mod", help="Keep downloading mod file", action='store_true')
 
     args = parser.parse_args()
-
+    faulthandler.enable()
     sys.excepthook = exception_hook
     mod_manager = ModManager(ff8_path=args.path)
 
     app = QApplication.instance()
     if not app:  # sinon on crée une instance de QApplication
         app = QApplication(sys.argv)
+        if app.style().objectName() == "windows11":
+            app.setStyle("Fusion")
 
     window_installer = WindowInstaller(mod_manager)
     sys.exit(app.exec())

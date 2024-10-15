@@ -1,41 +1,52 @@
 import os
+import types
 
 from PyQt6 import sip
 from PyQt6.QtCore import Qt, QObject, pyqtSignal, pyqtSlot, QThread, QSize
 from PyQt6.QtGui import QIcon, QFont
 from PyQt6.QtWidgets import QWidget, QPushButton, QVBoxLayout, QCheckBox, QMessageBox, QProgressBar, QLabel, QFrame, \
-    QComboBox, QHBoxLayout, QSizePolicy
+    QComboBox, QHBoxLayout, QSizePolicy, QLayout
 
-from modmanager import ModManager
+from model.mod import ModVersion, ModType, Mod
+from modmanager import ModManager, GroupModType, ModLang, ModWrapper
 from view.listmodwidget import ListModWidget
 
 
 class Installer(QObject):
     progress = pyqtSignal(int)
     completed = pyqtSignal(int)
-    update_data_completed = pyqtSignal()
+    update_mod_list_completed = pyqtSignal()
+    restore_backup_completed = pyqtSignal(bool)
 
-    @pyqtSlot(ModManager, list, bool, dict, bool, str, bool)
-    def install(self, mod_manager, mod_to_be_installed, keep_downloaded_mod, special_status={}, download=True,
-                ff8_version="ffnx", backup=True):
+    @pyqtSlot(ModManager, list, types.MethodType, bool,  bool, ModWrapper, bool)
+    def install(self, mod_manager, mod_to_be_installed, update_download_func, keep_downloaded_mod, download=True,
+                ff8_version=ModWrapper.FFNX, backup=True):
         for index, mod_name in enumerate(mod_to_be_installed):
-            mod_manager.install_mod(mod_name, keep_downloaded_mod, special_status, download, ff8_version, backup)
+            mod_manager.install_mod(mod_name, update_download_func, keep_downloaded_mod, download, ff8_version, backup)
             self.progress.emit(index + 1)
-        self.completed.emit(len(mod_to_be_installed))
+        self.completed.emit(len(mod_to_be_installed)+1)
 
     @pyqtSlot(ModManager)
-    def update_data(self, mod_manager):
-        mod_manager.update_data()
-        self.update_data_completed.emit()
+    def update_mod_list(self, mod_manager):
+        mod_manager.update_mod_list()
+        self.update_mod_list_completed.emit()
+
+    @pyqtSlot(ModManager)
+    def restore_backup(self, mod_manager):
+        self.restore_backup_completed.emit(mod_manager.restore_backup())
 
 
 class WindowInstaller(QWidget):
-    install_requested = pyqtSignal(ModManager, list, bool, dict, bool, str, bool)
-    update_data_requested = pyqtSignal(ModManager)
+    install_requested = pyqtSignal(ModManager, list, types.MethodType, bool,  bool, ModWrapper, bool)
+    update_mod_list_requested = pyqtSignal(ModManager)
+    restore_backup_requested = pyqtSignal(ModManager)
 
-    VERSION_LIST = ["FF8 PC 2000", "FF8 Steam 2013", "FF8 Remastered"]
-    LANG_LIST = ["en", "fr", "de"]
-    MOD_TYPE_LIST = ["All", "Wrapper", "Graphical", "Music", "Gameplay", "EaseOfLife"]
+    VERSION_STR_LIST = ["FF8 PC 2000", "FF8 Steam 2013", "FF8 Remastered"]
+    VERSION_LIST = [ModVersion.FF8_2000, ModVersion.FF8_2013, ModVersion.FF8_REMASTER]
+    LANG_STR_LIST = ["en", "fr", "de", "es", "it"]
+    LANG_LIST = [ModLang.EN, ModLang.FR, ModLang.DE, ModLang.ES, ModLang.IT]
+    MOD_TYPE_STRING_LIST = ["All", "Wrapper", "Graphical", "Music", "Gameplay", "EaseOfLife"]
+    MOD_TYPE_LIST = [GroupModType.ALL, GroupModType.WRAPPER, GroupModType.GRAPHIC, GroupModType.MUSIC, GroupModType.GAMEPLAY, GroupModType.EASEOFLIFE]
 
     def __init__(self, mod_manager, icon_path=os.path.join("HobbitInstaller-data", 'Resources')):
 
@@ -45,24 +56,26 @@ class WindowInstaller(QWidget):
         self.installer_thread = QThread()
         self.installer.progress.connect(self.install_progress)
         self.installer.completed.connect(self.install_completed)
-        self.installer.update_data_completed.connect(self.update_data_completed)
+        self.installer.update_mod_list_completed.connect(self.update_mod_list_completed)
+        self.installer.restore_backup_completed.connect(self.restore_backup_completed)
         self.install_requested.connect(self.installer.install)
-        self.update_data_requested.connect(self.installer.update_data)
+        self.update_mod_list_requested.connect(self.installer.update_mod_list)
+        self.restore_backup_requested.connect(self.installer.restore_backup)
         self.installer.moveToThread(self.installer_thread)
         self.installer_thread.start()
 
         # Main window
         self.setWindowTitle("HobbitInstaller")
-        #self.setMinimumWidth(700)
-        #self.setSizePolicy(QSizePolicy.Policy.Maximum, QSizePolicy.Policy.Maximum)
+        # self.setMinimumWidth(400)
+        self.setSizePolicy(QSizePolicy.Policy.Minimum, QSizePolicy.Policy.Minimum)
         self.__icon = QIcon(os.path.join(icon_path, 'icon.png'))
         self.__icon_info = QIcon(os.path.join(icon_path, 'info.png'))
         self.setWindowIcon(self.__icon)
         self.__setup_setup()
         self.__setup_main()
 
-        self.mod_widget = ListModWidget(mod_manager, self.language.currentText(), self.ff8_version.currentText(),
-                                        self.mod_type.currentText())
+        self.mod_widget = ListModWidget(mod_manager)
+        self._update_mod()
         self.mod_manager = mod_manager
 
         self.layout_main = QVBoxLayout()
@@ -72,6 +85,7 @@ class WindowInstaller(QWidget):
         self.layout_mod_type = QHBoxLayout()
         self.setup_layout()
         self.show_all()
+        self.resize(self.sizeHint())
 
     def __show_info(self):
         message_box = QMessageBox()
@@ -81,26 +95,6 @@ class WindowInstaller(QWidget):
         message_box.setWindowIcon(self.__icon)
         message_box.setWindowTitle("HobbitInstaller - Info")
         message_box.exec()
-
-    def __clear_one_layout(self, layout):
-        if layout:
-            for i in reversed(range(layout.count())):
-                item = layout.itemAt(i)
-                widget = item.widget()
-                if widget:
-                    # widget.setParent(None)
-                    sip.delete(widget)
-
-    def __clear_layout(self):
-        pass
-        # self.__clear_one_layout(self.layout_setup)
-        # self.__clear_one_layout(self.layout_mod)
-        # self.__clear_one_layout(self.layout_main)
-        # self.__clear_one_layout(self.layout_ragnarok)
-        # self.__clear_one_layout(self.layout_ff8reloaded)
-        # self.layout_mod = QVBoxLayout()
-        # self.layout_ragnarok = QVBoxLayout()
-        # self.layout_ff8reloaded = QVBoxLayout()
 
     def __setup_main(self):
         # Button install
@@ -112,9 +106,9 @@ class WindowInstaller(QWidget):
         self.install_over.hide()
 
         # Button Update link data
-        self.update_data_button = QPushButton(parent=self, text="Updating mod list")
-        self.update_data_button.clicked.connect(self.update_data_click)
-        self.update_data_button.setToolTip("Update mod list, version available and link")
+        self.update_mod_list_button = QPushButton(parent=self, text="Updating mod list")
+        self.update_mod_list_button.clicked.connect(self.update_mod_list)
+        self.update_mod_list_button.setToolTip("Update mod list, version available and link")
 
         self.restore_button = QPushButton(parent=self, text="Restore backup data")
         self.restore_button.clicked.connect(self.restore_click)
@@ -127,6 +121,13 @@ class WindowInstaller(QWidget):
         self.update_data_over.hide()
 
         self.progress = QProgressBar(parent=self)
+        self.progress.setTextVisible(True)
+        self.progress.setFormat("Full installation status")
+        self.progress.setAlignment(Qt.AlignmentFlag.AlignCenter)
+        self.progress_current_download = QProgressBar(parent=self)
+        self.progress_current_download.setTextVisible(True)
+        self.progress_current_download.setFormat("Current download status")
+        self.progress_current_download.setAlignment(Qt.AlignmentFlag.AlignCenter)
 
     def __setup_setup(self):
         # Setup
@@ -150,22 +151,22 @@ class WindowInstaller(QWidget):
 
         self.ff8_version_label = QLabel(parent=self, text="FF8 Version")
         self.ff8_version = QComboBox(parent=self)
-        self.ff8_version.addItems(self.VERSION_LIST)
-        self.ff8_version.activated.connect(self.reload_gui)
+        self.ff8_version.addItems(self.VERSION_STR_LIST)
+        self.ff8_version.activated.connect(self._update_mod)
         self.ff8_version.setToolTip(
             "Your FF8 version, either the classic one from steam released in 2013, or the remaster.")
         self.ff8_version.setCurrentIndex(1)
 
         self.language_label = QLabel(parent=self, text="FF8 language")
         self.language = QComboBox(parent=self)
-        self.language.addItems(self.LANG_LIST)
-        self.language.activated.connect(self.reload_gui)
+        self.language.addItems(self.LANG_STR_LIST)
+        self.language.activated.connect(self._update_mod)
         self.language.setToolTip("The language you play on")
 
         self.mod_type_label = QLabel(parent=self, text="Mod type")
         self.mod_type = QComboBox(parent=self)
-        self.mod_type.addItems(self.MOD_TYPE_LIST)
-        self.mod_type.activated.connect(self.reload_gui)
+        self.mod_type.addItems(self.MOD_TYPE_STRING_LIST)
+        self.mod_type.activated.connect(self._update_mod)
         self.mod_type.setToolTip("To sort all mods by type")
 
         self.separator = QFrame(self)
@@ -183,7 +184,6 @@ class WindowInstaller(QWidget):
         self.layout_title = QHBoxLayout()
         self.layout_title.addWidget(self.info_button)
         self.layout_title.addWidget(self.label_setup)
-        self.layout_setup.addLayout(self.layout_title)
 
         self.layout_ff8_version.addWidget(self.ff8_version_label)
         self.layout_ff8_version.addWidget(self.ff8_version)
@@ -197,87 +197,118 @@ class WindowInstaller(QWidget):
         self.layout_language.addWidget(self.language)
         self.layout_language.addStretch(1)
 
+        self.layout_setup.addLayout(self.layout_title)
         self.layout_setup.addLayout(self.layout_language)
         self.layout_setup.addLayout(self.layout_ff8_version)
         self.layout_setup.addLayout(self.layout_mod_type)
-        # self.layout_setup.addWidget(self.download)
         self.download.hide()
         self.layout_setup.addWidget(self.keep_mod_archive)
         self.layout_setup.addWidget(self.backup)
         self.layout_setup.addWidget(self.separator)
+        self.layout_setup.addStretch(1)
+        self.layout_setup.setSizeConstraint(QLayout.SizeConstraint.SetFixedSize)
 
     def __setup_main_layout(self):
         self.layout_main.addLayout(self.layout_setup)
         self.layout_main.addWidget(self.mod_widget)
         self.layout_main.addWidget(self.restore_button)
-        self.layout_main.addWidget(self.update_data_button)
+        self.layout_main.addWidget(self.update_mod_list_button)
         self.layout_main.addWidget(self.install_button)
         self.layout_main.addWidget(self.progress)
+        self.layout_main.addWidget(self.progress_current_download)
+        self.layout_main.addStretch(1)
         self.setLayout(self.layout_main)
 
     def show_all(self):
         self.mod_widget.show()
         self.install_button.show()
         self.progress.hide()
-        #self.resize(self.minimumSizeHint())
+        self.progress_current_download.hide()
         self.show()
 
     def setup_layout(self):
         self.__setup_setup_layout()
         self.__setup_main_layout()
-        # self.resize(self.minimumSizeHint())
 
     def install_click(self):
         self.progress.show()
-        (mod_to_be_installed, special_status) = self.mod_widget.get_mod_to_install()
+        self.progress_current_download.show()
+        mod_to_be_installed = self.mod_widget.get_mod_to_install()
+        self.progress.setRange(0, len(mod_to_be_installed)+1)
+        self.progress.setValue(0)
+        self.install_requested.emit(self.mod_manager, mod_to_be_installed, self.update_download, self.keep_mod_archive.isChecked(), self.download.isChecked(), self.get_current_wrapper(), self.backup.isChecked())
 
-        self.progress.setRange(0, len(mod_to_be_installed) + 1)
-        self.progress.setValue(1)
-        download = self.download.isChecked()
-        if self.ff8_version.currentText() in (self.VERSION_LIST[0], self.VERSION_LIST[1]):
-            ff8_version = "ffnx"
-        elif self.ff8_version.currentText() == self.VERSION_LIST[1]:
-            ff8_version = "demaster"
+    def update_download(self, advancement:int, max_size:int):
+        print("update_download")
+        print(advancement)
+        print(max_size)
+        if advancement > 0 and max_size >0:
+            self.progress_current_download.setRange(0, max_size)
+            self.progress_current_download.setValue(advancement)
         else:
-            ff8_version = ""
-        self.install_requested.emit(self.mod_manager, mod_to_be_installed, self.keep_mod_archive.isChecked(),
-                                    special_status, download, ff8_version, self.backup.isChecked())
+            self.progress_current_download.setFormat("No download information")
 
-    def update_data_click(self):
+    def update_mod_list(self):
         self.progress.show()
         self.progress.setRange(0, 1)
         self.progress.setValue(0)
-        self.update_data_requested.emit(self.mod_manager)
+        self.update_mod_list_requested.emit(self.mod_manager)
 
     def restore_click(self):
-        pass
-        #self.progress.show()
-        #self.progress.setRange(0, 1)
-        #self.progress.setValue(0)
-        #self.update_data_requested.emit(self.mod_manager)
+        self.progress.show()
+        self.progress.setRange(0, 1)
+        self.progress.setValue(0)
+        self.restore_backup_requested.emit(self.mod_manager)
 
     def install_progress(self, nb_install_done):
-        self.progress.setValue(nb_install_done + 1)
+        self.progress.setValue(nb_install_done)
 
     def install_completed(self, nb_install_done):
-        self.progress.setValue(nb_install_done + 1)
+        self.progress.setValue(nb_install_done)
         self.progress.hide()
+        self.progress_current_download.hide()
+        self.progress.setValue(0)
+        self.progress_current_download.setValue(0)
         self.install_over.show()
-        #self.resize(self.minimumSizeHint())
+        self.progress_current_download.setFormat("Current download status")
+        self.updateGeometry()
+        # self.resize(self.minimumSizeHint())
 
-    def update_data_completed(self):
+    def update_mod_list_completed(self):
         self.progress.setValue(1)
         self.progress.hide()
         self.update_data_over.show()
-        self.reload_gui()
+        self._update_mod()
 
-    def reload_gui(self):
-        lang = self.language.currentText()
-        ff8_version = self.ff8_version.currentText()
-        mod_type = self.mod_type.currentText()
-        # self.__clear_layout()
-        self.mod_widget.show_specific_mod(lang, ff8_version, mod_type)
+    def restore_backup_completed(self, worked):
+        message_box = QMessageBox()
+        if worked:
+            message_box.setText(f"Backup retrieved !")
+        else:
+            message_box.setText(f"File backup_data.zip doesn't exist, couldn't retrieve")
+        message_box.setIcon(QMessageBox.Icon.Information)
+        message_box.setWindowIcon(self.__icon)
+        message_box.setWindowTitle("HobbitInstaller - Info")
+        message_box.exec()
+        self.progress.setValue(0)
+        self.progress.hide()
 
-        # self.layout_main.insertLayout(1, self.layout_mod)
-        self.show_all()
-        #self.resize(self.minimumSizeHint())
+    def get_current_lang(self):
+        return self.LANG_LIST[self.language.currentIndex()]
+
+    def get_current_wrapper(self):
+        if self.get_current_version() in (ModVersion.FF8_2000, ModVersion.FF8_2013):
+            return ModWrapper.FFNX
+        elif self.get_current_version() == ModVersion.FF8_REMASTER:
+            return ModWrapper.DEMASTER
+        else:
+            print(f"Unexpected value for current wrapper: {self.get_current_version()}")
+
+    def get_current_version(self):
+        return self.VERSION_LIST[self.ff8_version.currentIndex()]
+
+    def get_current_mod_type(self):
+        return self.MOD_TYPE_LIST[self.mod_type.currentIndex()]
+
+    def _update_mod(self):
+        self.mod_widget.show_specific_mod(self.get_current_lang(), self.get_current_version(), self.get_current_mod_type())

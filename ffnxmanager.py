@@ -1,7 +1,7 @@
 import os
 
 
-class FFNxManager():
+class FFNxManager:
     FFNX_FILE_SETUP = "FFNx.toml"
 
     def __init__(self):
