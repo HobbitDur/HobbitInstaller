@@ -325,5 +325,5 @@ class ModManager:
                 self.ffnx_manager.change_ffnx_option(ffnx_param, self.ff8_path)
 
     def update_mod_list(self):
-        self.install_mod(Mod(self.UPDATE_DATA_NAME, self.mod_dict_json[self.UPDATE_DATA_NAME]))
+        self.install_mod(Mod(self.UPDATE_DATA_NAME, self.mod_dict_json[self.UPDATE_DATA_NAME]), backup=False)
         self.__init_mod_data()
