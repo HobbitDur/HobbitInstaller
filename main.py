@@ -20,7 +20,7 @@ if __name__ == '__main__':
     parser.add_argument("-kdm", "--keep_download_mod", help="Keep downloading mod file", action='store_true')
 
     args = parser.parse_args()
-    faulthandler.enable()
+    #faulthandler.enable()
     sys.excepthook = exception_hook
     mod_manager = ModManager(ff8_path=args.path)
 
