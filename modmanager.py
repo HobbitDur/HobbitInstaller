@@ -90,9 +90,15 @@ class ModManager:
                             new_compat = ModWrapper.FFNX
                         self.mod_dict_json[mod_name]["compatibility"][index_compat] = new_compat
 
-    def __download_file(self, link, download_update_func: types.MethodType = None, headers={}, write_file=False, file_name=None, dest_path=FOLDER_DOWNLOAD)-> (requests.models.Response, str):
+    def __download_file(self, link, download_update_func: types.MethodType = None, headers={}, write_file=False, file_name=None, dest_path=FOLDER_DOWNLOAD) -> (
+    requests.models.Response, str):
         print("Downloading with link: {}".format(link))
-        request_return = requests.get(link, headers=headers)
+        if write_file:
+            stream = True
+        else:
+            stream = False
+
+        request_return = requests.get(link, headers=headers, stream=stream)
 
         if not file_name:
             if "Content-Disposition" in request_return.headers.keys():
@@ -107,10 +113,8 @@ class ModManager:
             else:
                 file_name = link.split("/")[-1]
 
-        response = requests.get(link, stream=True)
-
         if write_file:
-            total_length = response.headers.get('content-length')
+            total_length = request_return.headers.get('content-length')
             if total_length is None:  # no content length header
                 total_length = -1
             else:
@@ -119,13 +123,13 @@ class ModManager:
             if download_update_func:
                 download_update_func(dl, total_length)
             full_data = bytearray()
-            for data in response.iter_content(chunk_size=4096):
+            for data in request_return.iter_content(chunk_size=4096):
                 dl += len(data)
                 full_data.extend(data)
                 if download_update_func:
                     download_update_func(dl, total_length)
-                with open(os.path.join(dest_path, file_name), "wb") as file:
-                    file.write(full_data)
+            with open(os.path.join(dest_path, file_name), "wb") as file:
+                file.write(full_data)
 
         if request_return.status_code == 200:
             print("Successfully downloaded {}".format(link))
@@ -165,7 +169,8 @@ class ModManager:
             print(f"/!\\ File backup_data.zip doesn't exist, fail restoring")
             return False
 
-    def install_mod(self, mod: Mod, download_update_func: types.MethodType=None, keep_download_mod=False, download=True, ff8_wrapper=ModWrapper.FFNX, backup=True):
+    def install_mod(self, mod: Mod, download_update_func: types.MethodType = None, keep_download_mod=False, download=True, ff8_wrapper=ModWrapper.FFNX,
+                    backup=True):
         if backup:
             try:
                 print("Backing up the data")

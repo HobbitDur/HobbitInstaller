@@ -15,14 +15,15 @@ from view.listmodwidget import ListModWidget
 class Installer(QObject):
     progress = pyqtSignal(int)
     completed = pyqtSignal(int)
+    download_progress = pyqtSignal(int, int)
     update_mod_list_completed = pyqtSignal()
     restore_backup_completed = pyqtSignal(bool)
 
-    @pyqtSlot(ModManager, list, types.MethodType, bool,  bool, ModWrapper, bool)
-    def install(self, mod_manager, mod_to_be_installed, update_download_func, keep_downloaded_mod, download=True,
+    @pyqtSlot(ModManager, list, bool,  bool, ModWrapper, bool)
+    def install(self, mod_manager, mod_to_be_installed, keep_downloaded_mod, download=True,
                 ff8_version=ModWrapper.FFNX, backup=True):
         for index, mod_name in enumerate(mod_to_be_installed):
-            mod_manager.install_mod(mod_name, update_download_func, keep_downloaded_mod, download, ff8_version, backup)
+            mod_manager.install_mod(mod_name, self.download_progress.emit, keep_downloaded_mod, download, ff8_version, backup)
             self.progress.emit(index + 1)
         self.completed.emit(len(mod_to_be_installed))
 
@@ -37,7 +38,7 @@ class Installer(QObject):
 
 
 class WindowInstaller(QWidget):
-    install_requested = pyqtSignal(ModManager, list, types.MethodType, bool,  bool, ModWrapper, bool)
+    install_requested = pyqtSignal(ModManager, list, bool,  bool, ModWrapper, bool)
     update_mod_list_requested = pyqtSignal(ModManager)
     restore_backup_requested = pyqtSignal(ModManager)
 
@@ -56,6 +57,7 @@ class WindowInstaller(QWidget):
         self.installer_thread = QThread()
         self.installer.progress.connect(self.install_progress)
         self.installer.completed.connect(self.install_completed)
+        self.installer.download_progress.connect(self.update_download)
         self.installer.update_mod_list_completed.connect(self.update_mod_list_completed)
         self.installer.restore_backup_completed.connect(self.restore_backup_completed)
         self.install_requested.connect(self.installer.install)
@@ -239,7 +241,7 @@ class WindowInstaller(QWidget):
         mod_to_be_installed = self.mod_widget.get_mod_to_install()
         self.progress.setRange(0, len(mod_to_be_installed))
         self.progress.setValue(0)
-        self.install_requested.emit(self.mod_manager, mod_to_be_installed, self.update_download, self.keep_mod_archive.isChecked(), self.download.isChecked(), self.get_current_wrapper(), self.backup.isChecked())
+        self.install_requested.emit(self.mod_manager, mod_to_be_installed, self.keep_mod_archive.isChecked(), self.download.isChecked(), self.get_current_wrapper(), self.backup.isChecked())
 
     def update_download(self, advancement:int, max_size:int):
         if advancement >= 0 and max_size >= 0:
