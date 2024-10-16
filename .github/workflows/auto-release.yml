@@ -33,7 +33,7 @@ jobs:
         shell: bash
         run: |
           ls -al HobbitInstaller-data/
-          pyinstaller -n HobbitInstaller -F --specpath release/build --distpath release --workpath release/build --onefile --noconsole --icon=../../HobbitInstaller-data/Resources/icon.ico --hidden-import patool main.py
+          pyinstaller -n HobbitInstaller -F --specpath release/build --distpath release --workpath release/build --onefile --icon=../../HobbitInstaller-data/Resources/icon.ico --hidden-import patool main.py
           mkdir -p release/HobbitInstaller
           mkdir -p release/HobbitInstaller/HobbitInstaller-data
           cp -R HobbitInstaller-data/Resources release/HobbitInstaller/HobbitInstaller-data
