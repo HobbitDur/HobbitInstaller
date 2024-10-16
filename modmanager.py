@@ -90,21 +90,9 @@ class ModManager:
                             new_compat = ModWrapper.FFNX
                         self.mod_dict_json[mod_name]["compatibility"][index_compat] = new_compat
 
-    def __download_file(self, link, download_update_func: types.MethodType = None, headers={}, write_file=False, file_name=None, dest_path=FOLDER_DOWNLOAD):
+    def __download_file(self, link, download_update_func: types.MethodType = None, headers={}, write_file=False, file_name=None, dest_path=FOLDER_DOWNLOAD)-> (requests.models.Response, str):
         print("Downloading with link: {}".format(link))
-        request_return = requests.get(link, headers=headers, stream=True)
-        response = requests.get(link, stream=True)
-
-        if download_update_func:
-            total_length = response.headers.get('content-length')
-            if total_length is None:  # no content length header
-                download_update_func(-1, -1)
-            else:
-                dl = 0
-                total_length = int(total_length)
-                for data in response.iter_content(chunk_size=4096):
-                    dl += len(data)
-                    download_update_func(dl, total_length)
+        request_return = requests.get(link, headers=headers)
 
         if not file_name:
             if "Content-Disposition" in request_return.headers.keys():
@@ -118,13 +106,32 @@ class ModManager:
                 file_name = file_name.replace('+', ' ')
             else:
                 file_name = link.split("/")[-1]
+
+        response = requests.get(link, stream=True)
+
+        if write_file:
+            total_length = response.headers.get('content-length')
+            if total_length is None:  # no content length header
+                total_length = -1
+            else:
+                total_length = int(total_length)
+            dl = 0
+            if download_update_func:
+                download_update_func(dl, total_length)
+            full_data = bytearray()
+            for data in response.iter_content(chunk_size=4096):
+                dl += len(data)
+                full_data.extend(data)
+                if download_update_func:
+                    download_update_func(dl, total_length)
+                with open(os.path.join(dest_path, file_name), "wb") as file:
+                    file.write(full_data)
+
         if request_return.status_code == 200:
             print("Successfully downloaded {}".format(link))
-            if write_file:
-                with open(os.path.join(dest_path, file_name), "wb") as file:
-                    file.write(request_return.content)
         else:
             print("Fail to download {}".format(link))
+
         return request_return, file_name
 
     def save_local_file(self, lang="en"):
@@ -158,11 +165,11 @@ class ModManager:
             print(f"/!\\ File backup_data.zip doesn't exist, fail restoring")
             return False
 
-    def install_mod(self, mod: Mod, download_update_func: types.MethodType, keep_download_mod=False, download=True, ff8_wrapper=ModWrapper.FFNX, backup=True):
+    def install_mod(self, mod: Mod, download_update_func: types.MethodType=None, keep_download_mod=False, download=True, ff8_wrapper=ModWrapper.FFNX, backup=True):
         if backup:
             try:
                 print("Backing up the data")
-                shutil.make_archive("backup_data.zip", 'zip', "Data")
+                shutil.make_archive(base_name=os.path.join(self.ff8_path, "backup_data"), format='zip', root_dir=self.ff8_path, base_dir="Data")
             except FileExistsError:
                 print(f"File backup_data.zip already exist")
             except FileNotFoundError:
@@ -197,7 +204,7 @@ class ModManager:
             elif ff8_wrapper == ModWrapper.DEMASTER:
                 direct_file = mod.info['remaster-link']
             else:
-                print("Error unexpected ff8_version: {}".format(ff8_wrapper))
+                print("Error unexpected ff8 wrapper: {}".format(ff8_wrapper))
                 direct_file = mod.info['link']
             if mod.name == "FFNxFF8Music":  # need remove " around
                 dd_file_name = mod.info["download_name"]
@@ -206,7 +213,7 @@ class ModManager:
             if download:
                 dd_file_name = self.__download_file(direct_file, download_update_func, write_file=True, file_name=dd_file_name)[1]
             else:
-                dd_file_name = self.mod_dict_json[mod.name]["download_name"]
+                dd_file_name = mod.info["download_name"]
         else:
             raise ValueError("Unexpected ELSE")
 

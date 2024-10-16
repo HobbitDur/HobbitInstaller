@@ -24,7 +24,7 @@ class Installer(QObject):
         for index, mod_name in enumerate(mod_to_be_installed):
             mod_manager.install_mod(mod_name, update_download_func, keep_downloaded_mod, download, ff8_version, backup)
             self.progress.emit(index + 1)
-        self.completed.emit(len(mod_to_be_installed)+1)
+        self.completed.emit(len(mod_to_be_installed))
 
     @pyqtSlot(ModManager)
     def update_mod_list(self, mod_manager):
@@ -48,7 +48,7 @@ class WindowInstaller(QWidget):
     MOD_TYPE_STRING_LIST = ["All", "Wrapper", "Graphical", "Music", "Gameplay", "EaseOfLife"]
     MOD_TYPE_LIST = [GroupModType.ALL, GroupModType.WRAPPER, GroupModType.GRAPHIC, GroupModType.MUSIC, GroupModType.GAMEPLAY, GroupModType.EASEOFLIFE]
 
-    def __init__(self, mod_manager, icon_path=os.path.join("HobbitInstaller-data", 'Resources')):
+    def __init__(self, mod_manager:ModManager, icon_path=os.path.join("HobbitInstaller-data", 'Resources')):
 
         QWidget.__init__(self)
         # Managing thread
@@ -73,10 +73,10 @@ class WindowInstaller(QWidget):
         self.setWindowIcon(self.__icon)
         self.__setup_setup()
         self.__setup_main()
-
-        self.mod_widget = ListModWidget(mod_manager)
-        self._update_mod()
         self.mod_manager = mod_manager
+        self.mod_widget = ListModWidget(self.mod_manager)
+
+
 
         self.layout_main = QVBoxLayout()
         self.layout_setup = QVBoxLayout()
@@ -86,9 +86,10 @@ class WindowInstaller(QWidget):
         self.setup_layout()
         self.show_all()
         self.resize(self.sizeHint())
+        self._update_mod()
 
     def __show_info(self):
-        message_box = QMessageBox()
+        message_box = QMessageBox(parent=self)
         message_box.setText(f"Tool done by <b>Hobbitdur</b>.<br/>"
                             f"You can support me on <a href='https://www.patreon.com/HobbitMods'>Patreon</a>.<br/>")
         message_box.setIcon(QMessageBox.Icon.Information)
@@ -103,7 +104,6 @@ class WindowInstaller(QWidget):
         self.install_over = QMessageBox(parent=self)
         self.install_over.setWindowTitle("Installing over!")
         self.install_over.setText("Installing over!")
-        self.install_over.hide()
 
         # Button Update link data
         self.update_mod_list_button = QPushButton(parent=self, text="Updating mod list")
@@ -116,8 +116,8 @@ class WindowInstaller(QWidget):
 
         self.update_data_over = QMessageBox(parent=self)
         self.update_data_over.setIcon(QMessageBox.Icon.Information)
-        self.update_data_over.setWindowTitle("Updating data over!")
-        self.update_data_over.setText("Updating data over!")
+        self.update_data_over.setWindowTitle("Updating mod over!")
+        self.update_data_over.setText("Updating mod list over!")
         self.update_data_over.hide()
 
         self.progress = QProgressBar(parent=self)
@@ -231,18 +231,19 @@ class WindowInstaller(QWidget):
         self.__setup_main_layout()
 
     def install_click(self):
+        self.install_button.setEnabled(False)
+        self.restore_button.setEnabled(False)
+        self.update_mod_list_button.setEnabled(False)
         self.progress.show()
         self.progress_current_download.show()
         mod_to_be_installed = self.mod_widget.get_mod_to_install()
-        self.progress.setRange(0, len(mod_to_be_installed)+1)
+        self.progress.setRange(0, len(mod_to_be_installed))
         self.progress.setValue(0)
         self.install_requested.emit(self.mod_manager, mod_to_be_installed, self.update_download, self.keep_mod_archive.isChecked(), self.download.isChecked(), self.get_current_wrapper(), self.backup.isChecked())
 
     def update_download(self, advancement:int, max_size:int):
-        print("update_download")
-        print(advancement)
-        print(max_size)
-        if advancement > 0 and max_size >0:
+        if advancement >= 0 and max_size >= 0:
+            self.progress_current_download.setFormat("Current download status")
             self.progress_current_download.setRange(0, max_size)
             self.progress_current_download.setValue(advancement)
         else:
@@ -262,23 +263,28 @@ class WindowInstaller(QWidget):
 
     def install_progress(self, nb_install_done):
         self.progress.setValue(nb_install_done)
+        self.progress_current_download.setValue(0)
 
     def install_completed(self, nb_install_done):
         self.progress.setValue(nb_install_done)
-        self.progress.hide()
-        self.progress_current_download.hide()
+        self.install_over.exec()
+
         self.progress.setValue(0)
         self.progress_current_download.setValue(0)
-        self.install_over.show()
         self.progress_current_download.setFormat("Current download status")
+        self.progress.hide()
+        self.progress_current_download.hide()
+        self.install_button.setEnabled(True)
+        self.restore_button.setEnabled(True)
+        self.update_mod_list_button.setEnabled(True)
         self.updateGeometry()
-        # self.resize(self.minimumSizeHint())
 
     def update_mod_list_completed(self):
         self.progress.setValue(1)
         self.progress.hide()
         self.update_data_over.show()
-        self._update_mod()
+        self._reset_mod_widget()
+
 
     def restore_backup_completed(self, worked):
         message_box = QMessageBox()
@@ -312,3 +318,18 @@ class WindowInstaller(QWidget):
 
     def _update_mod(self):
         self.mod_widget.show_specific_mod(self.get_current_lang(), self.get_current_version(), self.get_current_mod_type())
+        self.updateGeometry()
+        self.resize(self.sizeHint())
+
+    def _reset_mod_widget(self):
+        for i in range(self.layout_main.count()):
+            if self.layout_main.itemAt(i).widget() == self.mod_widget:
+                self.mod_widget.setParent(None)
+                self.mod_widget.deleteLater()
+                self.mod_widget = ListModWidget(self.mod_manager)
+                self.layout_main.insertWidget(i, self.mod_widget)
+                break
+        self._update_mod()
+        self.updateGeometry()
+
+
