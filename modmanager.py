@@ -91,7 +91,7 @@ class ModManager:
                         self.mod_dict_json[mod_name]["compatibility"][index_compat] = new_compat
 
     def __download_file(self, link, download_update_func: types.MethodType = None, headers={}, write_file=False, file_name=None, dest_path=FOLDER_DOWNLOAD) -> (
-    requests.models.Response, str):
+            requests.models.Response, str):
         print("Downloading with link: {}".format(link))
         if write_file:
             stream = True
@@ -172,11 +172,15 @@ class ModManager:
     def install_mod(self, mod: Mod, download_update_func: types.MethodType = None, keep_download_mod=False, download=True, ff8_wrapper=ModWrapper.FFNX,
                     backup=True):
         if backup:
+            print("Backing up the data")
             try:
-                print("Backing up the data")
-                shutil.make_archive(base_name=os.path.join(self.ff8_path, "backup_data"), format='zip', root_dir=self.ff8_path, base_dir="Data")
-            except FileExistsError:
-                print(f"File backup_data.zip already exist")
+                if not os.path.exists(os.path.join(self.ff8_path, "backup_data.zip")):
+                    shutil.make_archive(base_name=os.path.join(self.ff8_path, "backup_data"), format='zip', root_dir=os.path.join(self.ff8_path, "Data"),
+                                        base_dir=".")
+                else:
+                    print(f"File backup_data.zip already exist")
+            except FileExistsError:  # Normally doesn't append with make_archive
+                print(f"File already exist")
             except FileNotFoundError:
                 print("No Data file found for backup, are you sure you are in the FF8 folder ?")
 
