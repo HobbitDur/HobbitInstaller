@@ -52,7 +52,7 @@ class Mod:
 
         self.info = mod_info
         self.activated = self.info["default_selected"]
-        self.special_status = {}
+        self.special_status = ""
 
     def __str__(self):
         return f"Mod(Name:{self.name}, Info:{self.info}"

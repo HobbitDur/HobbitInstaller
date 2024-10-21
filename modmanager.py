@@ -302,10 +302,6 @@ class ModManager:
             os.chdir(installer_directory)
             archive_to_copy = ""
             futur_path = ""
-
-        elif 'DefaultFiles' in mod.name:
-            futur_path = os.path.join(self.ff8_path, 'Data', 'lang-{}'.format(mod.name[-2:].lower()))
-            archive_to_copy = os.path.join(archive, list_dir[index_folder])
         elif mod.get_type() == ModType.SETUP:
             archive_to_copy = os.path.join(archive, list_dir[index_folder])
             futur_path = os.path.join(os.getcwd(), "HobbitInstaller-data")
