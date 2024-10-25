@@ -153,7 +153,7 @@ class ModManager:
         dd_url = ""
         if mod.info['git_tag'] == 'latest':
             for el in json_file:
-                if el['tag_name'] != "canary" and el['tag_name'] != "prerelease" and el['tag_name'].count('.') >=2:
+                if el['tag_name'] != "canary" and el['tag_name'] != "prerelease" and el['tag_name'].count('.') >=1:
                     dd_url =el[json_url]
                     break
         else:  # Searching the tag
