@@ -25,7 +25,7 @@ class ModManager:
     UPDATE_DATA_NAME = "UpdateData"
     SETUP_FILE = os.path.join(FOLDER_SETUP, "setup.json")
     VERSION_LIST = ["FF8 PC 2000", "FF8 Steam 2013", "FF8 Remastered"]
-
+    LANG_STR_LIST = ["en", "fr", "de", "es", "it"]
     def __init__(self, ff8_path='.'):
         self.ffnx_manager = FFNxManager()
         os.makedirs(self.FOLDER_DOWNLOAD, exist_ok=True)
@@ -173,7 +173,7 @@ class ModManager:
             return False
 
     def install_mod(self, mod: Mod, download_update_func: types.MethodType = None, keep_download_mod=False, download=True, ff8_wrapper=ModWrapper.FFNX,
-                    backup=True):
+                    backup=True, lang_requested=ModLang.EN):
         if backup:
             print("Backing up the data")
             try:
@@ -268,6 +268,9 @@ class ModManager:
         elif mod.get_type() == ModType.RAGNAROK:
             archive_to_copy = os.path.join(archive, list_dir[index_folder], list_dir[index_folder], mod.special_status)
             futur_path = os.path.join(self.ff8_path, 'Data')
+        elif mod.name == "Tsunamod-Card-RF":
+            archive_to_copy = os.path.join(archive, self.LANG_STR_LIST[lang_requested.value])
+            futur_path = os.path.join(self.ff8_path)
         elif mod.name == "FF8Curiosite-FR-ONLY":
             archive_to_copy = archive
             futur_path = os.path.join(self.ff8_path, 'Data', 'lang-fr')
