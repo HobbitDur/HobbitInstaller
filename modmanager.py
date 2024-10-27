@@ -268,7 +268,7 @@ class ModManager:
         elif mod.get_type() == ModType.RAGNAROK:
             archive_to_copy = os.path.join(archive, list_dir[index_folder], list_dir[index_folder], mod.special_status)
             futur_path = os.path.join(self.ff8_path, 'Data')
-        elif mod.name == "Tsunamod-Card-RF":
+        elif mod.name == "[Tsunamods] Card-RF":
             archive_to_copy = os.path.join(archive, self.LANG_STR_LIST[lang_requested.value])
             futur_path = os.path.join(self.ff8_path)
         elif mod.name == "FF8Curiosite-FR-ONLY":
