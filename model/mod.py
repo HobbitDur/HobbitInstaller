@@ -16,11 +16,11 @@ class GroupModType(Enum):
     ALL = 6
     SETUP = 7
 class ModLang(Enum):
-    EN = 1
-    FR = 2
-    IT = 3
-    ES = 4
-    DE = 5
+    EN = 0
+    FR = 1
+    DE = 2
+    ES = 3
+    IT = 4
 
 class ModVersion(Enum):
     FF8_2000 = 1
