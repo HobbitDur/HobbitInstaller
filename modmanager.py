@@ -269,7 +269,7 @@ class ModManager:
             archive_to_copy = os.path.join(archive, list_dir[index_folder], list_dir[index_folder], mod.special_status)
             futur_path = os.path.join(self.ff8_path, 'Data')
         elif mod.name == "[Tsunamods] Card-RF":
-            archive_to_copy = os.path.join(archive, self.LANG_STR_LIST[lang_requested.value])
+            archive_to_copy = os.path.join(archive , 'Card-RF', self.LANG_STR_LIST[lang_requested.value])
             futur_path = os.path.join(self.ff8_path)
         elif mod.name == "FF8Curiosite-FR-ONLY":
             archive_to_copy = archive
@@ -330,10 +330,10 @@ class ModManager:
         ffnx_param = mod.info["ffnx_param"]
         if ffnx_param and ff8_wrapper == "ffnx":
             print("Updating FFNx.toml file for mod {}".format(mod.name))
-            if not os.path.join(self.ff8_path, "FFNx.toml"):
+            if not os.path.join(self.ff8_path, "FFNx.toml"): # If file doesnt exist, create it
                 with open(os.path.join(self.ff8_path, "FFNx.toml"), "w") as file:
                     pass
-                self.ffnx_manager.change_ffnx_option(ffnx_param, self.ff8_path)
+            self.ffnx_manager.change_ffnx_option(ffnx_param, self.ff8_path)
 
     def update_mod_list(self):
         self.install_mod(Mod(self.UPDATE_DATA_NAME, self.mod_dict_json[self.UPDATE_DATA_NAME]), backup=False)
