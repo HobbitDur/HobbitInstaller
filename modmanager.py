@@ -174,8 +174,6 @@ class ModManager:
 
     def install_mod(self, mod: Mod, download_update_func: types.MethodType = None, keep_download_mod=False, download=True, ff8_wrapper=ModWrapper.FFNX,
                     backup=True, lang_requested=ModLang.EN):
-        print("install_mod")
-        print(mod.special_status)
         if backup:
             print("Backing up the data")
             try:
@@ -337,9 +335,8 @@ class ModManager:
         # remove_test_file()
         if not keep_download_mod:
             shutil.rmtree(self.FOLDER_DOWNLOAD)
-
         ffnx_param = mod.info["ffnx_param"]
-        if ffnx_param and ff8_wrapper == "ffnx":
+        if ffnx_param and ff8_wrapper == ModWrapper.FFNX:
             print("Updating FFNx.toml file for mod {}".format(mod.name))
             if not os.path.join(self.ff8_path, "FFNx.toml"): # If file doesnt exist, create it
                 with open(os.path.join(self.ff8_path, "FFNx.toml"), "w") as file:
