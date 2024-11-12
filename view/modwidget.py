@@ -41,6 +41,7 @@ class ModWidget(QWidget):
 
         # FFVIII Reloaded
         if mod.get_type() == ModType.RELOADED:
+            self.select.toggled.connect(self._update_special_status)
             self.layout_ff8reloaded = QVBoxLayout()
             self.ff8reloaded_classic = QRadioButton(parent=self, text="FFVIII Reloaded classic")
             self.ff8reloaded_classic.setChecked(True)
@@ -63,6 +64,7 @@ class ModWidget(QWidget):
             self.layout_main.addWidget(self.ff8reloaded_level100)
         # Ragnarok
         elif mod.get_type()  == ModType.RAGNAROK:
+            self.select.toggled.connect(self._update_special_status)
             self.layout_ragnarok = QVBoxLayout()
             self.ragnarok_standard = QRadioButton(parent=self, text="Standard Mode files")
             self.ragnarok_standard.setChecked(True)

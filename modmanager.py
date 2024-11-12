@@ -174,6 +174,8 @@ class ModManager:
 
     def install_mod(self, mod: Mod, download_update_func: types.MethodType = None, keep_download_mod=False, download=True, ff8_wrapper=ModWrapper.FFNX,
                     backup=True, lang_requested=ModLang.EN):
+        print("install_mod")
+        print(mod.special_status)
         if backup:
             print("Backing up the data")
             try:
@@ -248,6 +250,7 @@ class ModManager:
             os.path.join("HobbitInstaller-data", 'Resources', '7z.exe')))
         if '.rar' in dd_file_name or '.7z' in dd_file_name:
             archive = "temparchive"
+            #subprocess.run(['HobbitInstaller-data\\Resources\\7z.exe', 'x', f'-o{archive}', '--', os.path.join(self.FOLDER_DOWNLOAD, dd_file_name)])
             patoolib.extract_archive(os.path.join(self.FOLDER_DOWNLOAD, dd_file_name), verbosity=-1, outdir=archive,
                                      program=os.path.join("HobbitInstaller-data", 'Resources', '7z.exe'))
         # Unzip locally then copy all files, so we don't have problem erasing files while unziping
@@ -262,12 +265,20 @@ class ModManager:
 
         except ValueError:
             index_folder = -1
+        print(mod.get_type())
         if mod.get_type() == ModType.RELOADED:  # Special handle
             archive_to_copy = os.path.join(archive, mod.special_status)
             futur_path = os.path.join(self.ff8_path, 'Data', 'lang-fr')
         elif mod.get_type() == ModType.RAGNAROK:
+            print(mod.special_status)
             archive_to_copy = os.path.join(archive, list_dir[index_folder], list_dir[index_folder], mod.special_status)
             futur_path = os.path.join(self.ff8_path, 'Data')
+            hext_to_copy = os.path.join(archive, list_dir[index_folder], list_dir[index_folder], "Ragnarok_mod.txt")
+            futur_path_hext_to_copy = os.path.join(self.ff8_path, 'hext', 'ff8')
+            shutil.copy(hext_to_copy, os.path.join(futur_path_hext_to_copy, 'en'))
+            shutil.copy(hext_to_copy, os.path.join(futur_path_hext_to_copy, 'en_nv'))
+            shutil.copy(hext_to_copy, os.path.join(futur_path_hext_to_copy, 'en_eidos'))
+            shutil.copy(hext_to_copy, os.path.join(futur_path_hext_to_copy, 'en_eidos_nv'))
         elif mod.name == "[Tsunamods] Card-RF":
             archive_to_copy = os.path.join(archive , 'Card-RF', self.LANG_STR_LIST[lang_requested.value])
             futur_path = os.path.join(self.ff8_path)

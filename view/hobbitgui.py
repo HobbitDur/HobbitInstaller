@@ -22,8 +22,8 @@ class Installer(QObject):
     @pyqtSlot(ModManager, list, bool,  bool, ModWrapper, bool, ModLang)
     def install(self, mod_manager, mod_to_be_installed, keep_downloaded_mod, download=True,
                 ff8_version=ModWrapper.FFNX, backup=True, lang=ModLang.EN):
-        for index, mod_name in enumerate(mod_to_be_installed):
-            mod_manager.install_mod(mod_name, self.download_progress.emit, keep_downloaded_mod, download, ff8_version, backup, lang)
+        for index, mod in enumerate(mod_to_be_installed):
+            mod_manager.install_mod(mod, self.download_progress.emit, keep_downloaded_mod, download, ff8_version, backup, lang)
             self.progress.emit(index + 1)
         self.completed.emit(len(mod_to_be_installed))
 

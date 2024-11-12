@@ -55,7 +55,7 @@ class Mod:
         self.special_status = ""
 
     def __str__(self):
-        return f"Mod(Name:{self.name}, Info:{self.info}"
+        return f"Mod(Name:{self.name}, Info:{self.info}, special: {self.special_status})"
     def __repr__(self):
         return self.__str__()
 
